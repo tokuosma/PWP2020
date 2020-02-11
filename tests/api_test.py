@@ -1,25 +1,25 @@
-import os
-import tempfile
+# import os
+# import tempfile
 
-import pytest
+# import pytest
 
-from climatecook import create_app, db
+# from climatecook import create_app, db
 
-@pytest.fixture
-def app():
-    db_fd, db_fname = tempfile.mkstemp()
+# @pytest.fixture
+# def app():
+#     db_fd, db_fname = tempfile.mkstemp()
 
-    config = {
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
-        "TESTING": True
-    }
+#     config = {
+#         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
+#         "TESTING": True
+#     }
 
-    app = create_app(config)
+#     app = create_app(config)
 
-    with app.app_context():
-        db.create_all()
+#     with app.app_context():
+#         db.create_all()
 
-    yield app
+#     yield app
 
-    os.close(db_fd)
-    os.unlink(db_fname)
+#     os.close(db_fd)
+#     os.unlink(db_fname)

@@ -16,7 +16,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 @pytest.fixture
-def app():
+def app_handle():
     db_fd, db_fname = tempfile.mkstemp()
 
     config = {
@@ -35,10 +35,11 @@ def app():
     os.unlink(db_fname)
 
 
-def test_create_recipe(app):
+def test_create_recipe(app_handle):
     recipe = Recipe(
         name="donkey-recipe"
     )
-    db.session.add(recipe)
-    db.session.commit()
-    assert Recipe.query.count() == 1
+    with app_handle.app_context():
+        db.session.add(recipe)
+        db.session.commit()
+        assert Recipe.query.count() == 1
