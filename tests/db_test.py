@@ -1,9 +1,12 @@
 import os
+import random
 import tempfile
 
 import pytest
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
+from sqlalchemy.exc import IntegrityError
+
 
 
 from climatecook import create_app, db
@@ -35,7 +38,7 @@ def app_handle():
     os.unlink(db_fname)
 
 
-def test_create_recipe(app_handle):
+def test_recipe_create(app_handle):
     recipe = Recipe(
         name="donkey-recipe"
     )
@@ -43,3 +46,36 @@ def test_create_recipe(app_handle):
         db.session.add(recipe)
         db.session.commit()
         assert Recipe.query.count() == 1
+
+
+def test_recipe_create_with_invalid_category(app_handle):
+    """
+    Try adding a recipe with a non-existing category
+    """
+    fake_id = random.randint(1, 10000000)
+    recipe = Recipe(
+        name="donkey-recipe",
+        recipe_category_id=fake_id
+    )
+    with app_handle.app_context():
+        db.session.add(recipe)
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+
+
+def test_recipe_create_with_invalid_name(app_handle):
+    """
+    Try adding a recipe with a non-existing category
+    """
+    recipe = Recipe(
+        name="",
+    )
+    with app_handle.app_context():
+        db.session.add(recipe)
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+            
+
+def test_create_recipe_category(app_handle):
+
+    pass
