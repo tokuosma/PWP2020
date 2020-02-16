@@ -426,8 +426,8 @@ def test_fooditem_create(app_handle):
         db.session.add(fooditemcategory)
         db.session.commit()
         assert FoodItem.query.count() == 1
-        #fooditem = FoodItem.query.filter_by(id=food_item_id).first()
-        #assert fooditem.food_item_category.id == food_item_category_id
+        fooditem = FoodItem.query.filter_by(id=food_item_id).first()
+        assert fooditem.food_item_category.id == food_item_category_id
 
 
 def test_fooditem_create_with_invalid_fooditemcategory(app_handle):
@@ -523,8 +523,8 @@ def test_fooditemequivalent_create(app_handle):
         db.session.add(fooditemcategory)
         db.session.commit()
         assert FoodItem.query.count() == 1
-        #fooditem = FoodItem.query.filter_by(id=food_item_id).first()
-        #assert fooditem.food_item_equivalents.id == food_item_equivalent_id
+        fooditem = FoodItem.query.filter_by(id=food_item_id).first()
+        assert fooditem.food_item_equivalents[0].id == food_item_equivalent_id
 
 
 def test_fooditemequivalent_create_with_invalid_fooditem(app_handle):
