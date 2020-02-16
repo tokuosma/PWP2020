@@ -59,9 +59,9 @@ class FoodItem(db.Model):
     food_item_category_id = db.Column(db.Integer, db.ForeignKey('food_item_category.id'), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     emission_per_kg = db.Column(db.Float, nullable=False)
-    vegan = db.Column(db.Boolean, nullable=False)
-    organic = db.Column(db.Boolean, nullable=False)
-    domestic = db.Column(db.Boolean, nullable=False)
+    vegan = db.Column(db.Boolean, nullable=False, default=0)
+    organic = db.Column(db.Boolean, nullable=False, default=0)
+    domestic = db.Column(db.Boolean, nullable=False, default=0)
 
     food_item_category = db.relationship("FoodItemCategory", back_populates="food_items")
     food_item_equivalents = db.relationship("FoodItemEquivalent", back_populates="food_item")
