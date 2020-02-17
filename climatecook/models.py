@@ -83,6 +83,7 @@ class FoodItemEquivalent(db.Model):
     __table_args__ = (
         CheckConstraint('unit_type > 0', name='cc_unit_type_enum_defined'),
         CheckConstraint('conversion_factor >= 0', name='cc_conversion_factor'),
+        db.UniqueConstraint("unit_type", "food_item_id", name="tuc_unit_type_food_item_id")
     )
 
 

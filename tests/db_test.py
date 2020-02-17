@@ -576,6 +576,45 @@ def test_fooditemequivalent_create_with_invalid_unit(app_handle):
             db.session.commit()
 
 
+def test_fooditemequivalent_create_with_duplicate_unittype(app_handle):
+    """
+    Try to add food item equivalent with duplicate food item type
+    """
+    food_item_id = random.randint(1, 10000000)
+    food_item_equivalent_id_1 = random.randint(1, 10000000)
+    food_item_equivalent_id_2 = random.randint(1, 10000000)
+    food_item_category_id = random.randint(1, 10000000)
+    fooditem = FoodItem(
+        id=food_item_id,
+        food_item_category_id=food_item_category_id,
+        name="donkey_salt",
+        emission_per_kg=100.0
+    )
+    fooditemequivalent_1 = FoodItemEquivalent(
+        id=food_item_equivalent_id_1,
+        food_item_id=food_item_id,
+        unit_type=10,
+        conversion_factor=100.0
+    )
+    fooditemequivalent_2 = FoodItemEquivalent(
+        id=food_item_equivalent_id_2,
+        food_item_id=food_item_id,
+        unit_type=10,
+        conversion_factor=100.0
+    )
+    fooditemcategory = FoodItemCategory(
+        id=food_item_category_id,
+        name="donkey"
+    )
+    with app_handle.app_context():
+        db.session.add(fooditem)
+        db.session.add(fooditemequivalent_1)
+        db.session.add(fooditemequivalent_2)
+        db.session.add(fooditemcategory)
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+
+
 def test_fooditemequivalent_create_with_invalid_conversion(app_handle):
     """
     Try to add fooditemequivalent with invalid conversion factor
