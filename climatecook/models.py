@@ -12,12 +12,12 @@ def init_db_command():
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    recipe_category_id = db.Column(db.Integer, db.ForeignKey('recipe_category.id'), nullable=True)
+    recipe_category_id = db.Column(db.Integer, db.ForeignKey('recipe_category.id', ondelete="SET NULL"), nullable=True)
     name = db.Column(db.String(64), nullable=False)
 
     recipe_category = db.relationship("RecipeCategory", back_populates="recipes")
-    ratings = db.relationship("Rating", back_populates="recipe")
-    ingredients = db.relationship("Ingredient", back_populates="recipe")
+    ratings = db.relationship("Rating", back_populates="recipe", cascade="all,delete")
+    ingredients = db.relationship("Ingredient", back_populates="recipe", cascade="all,delete")
 
     __table_args__ = (CheckConstraint('length(name) >= 1', name='cc_recipe_name'),)
 
@@ -31,7 +31,7 @@ class RecipeCategory(db.Model):
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(2048), nullable=False)
 
@@ -42,7 +42,7 @@ class Rating(db.Model):
 
 class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"), nullable=False)
     food_item_id = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=False)
     food_item_equivalent_id = db.Column(db.Integer, db.ForeignKey('food_item_equivalent.id'), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
@@ -64,7 +64,7 @@ class FoodItem(db.Model):
     domestic = db.Column(db.Boolean, nullable=False, default=0)
 
     food_item_category = db.relationship("FoodItemCategory", back_populates="food_items")
-    food_item_equivalents = db.relationship("FoodItemEquivalent", back_populates="food_item")
+    food_item_equivalents = db.relationship("FoodItemEquivalent", back_populates="food_item", cascade="all,delete")
 
     __table_args__ = (
         CheckConstraint('length(name) >= 1', name='cc_food_item_name'),
@@ -74,7 +74,7 @@ class FoodItem(db.Model):
 
 class FoodItemEquivalent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    food_item_id = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=False)
+    food_item_id = db.Column(db.Integer, db.ForeignKey('food_item.id', ondelete="CASCADE"), nullable=False)
     unit_type = db.Column(db.Integer, nullable=False)
     conversion_factor = db.Column(db.Float, nullable=False)
 
