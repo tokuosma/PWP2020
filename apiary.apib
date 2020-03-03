@@ -1,80 +1,225 @@
 FORMAT: 1A
-HOST: https://polls.apiblueprint.org/
+HOST: https://localhost:5000/
 
-# climatecook
+# ClimateCook API
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+ClimateCook is a simple API allowing consumers to browse recipes and get an estimate
+of the carbon footprint for each recipe.
 
-## Questions Collection [/questions]
+# Group Link Relations
 
-### List All Questions [GET]
+This section described custom link relations defined in this API. These are not resources. The API also uses 
+[IANA link relations](http://www.iana.org/assignments/link-relations/link-relations.xhtml) where applicable. Custom link relations are CURIEs that use the clicook: prefix. 
 
-+ Response 200 (application/json)
+## add-category-food-item
+Add a food item to a specific category
+## add-category-recipe
+Add a recipe to a specific category
+## add-food-item
+Add a new food item to collection
+## add-food-item-category
+Add a new food item category to collection
+## add-food-item-equivalent
+Add new food item equivalent for food item
+## add-ingredient
+Add a new ingredient to a recipe
+## add-recipe
+Add a new recipe to recipe collection
+## add-recipe-category
+Add a new recipe category to collection using.
+## category-food-items
+Go to collection of food items in a specific category
+## category-recipes
+Go to a collection of recipes in a specific category
+## delete
+Delete the associated resource
+## food-item
+Move to specific food item
+## food-item-categories-all
+Go to food item category collection
+## food-item-equivalent
+Move to specific food item equivalent
+## food-item-equivalents
+**TBD**
+## food-items-all
+Go to food item collection
+## food-items-with-equivalents
+Go to a collection that returns the food items combined with their equivalents
+## recipe-categories-all
+Move to recipe category collection
+## recipes-all
+Go to the recipe collection
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
+# Group Profiles
 
-### Create a New Question [POST]
+This section includes resource profiles which provide semantic descriptions for the attributes of each resource, as well as the list of controls (by link relation) available from that resource.
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+## Recipe Profile
 
-+ Request (application/json)
+### Link Relations
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+This section lists all possible link relations associated with recipes; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
 
-+ Response 201 (application/json)
+ * [add-category-recipe](reference/link-relations/add-category-recipe)
+ * [add-ingredient](reference/link-relations/add-ingredient)
+ * [add-recipe](reference/link-relations/add-recipe)
+ * [category-recipes](reference/link-relations/category-recipes)
+ * [food-items-all](reference/link-relations/food-items-all)
+ * [delete](reference/link-relations/delete)
+ * [recipe-categories-all](reference/link-relations/recipe-categories-all)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
 
-    + Headers
+ * collection
+ * edit
+ * item
+ * up
+ * self
+ 
+### Semantic Descriptors
 
-            Location: /questions/2
+#### Data Type Recipe
 
-    + Body
+ * `id`: Unique identifier givent to the recipe, used to address recipe resources.
+ * `recipe_category_id`: Unique identifier of the category the recipe belongs to.
+ * `name`: Name of the recipe.
+  
+ **Additional properties**
+ * `emissions_total`: Calculated sum of CO2 emissions of the recipe ingredients. 
+ 
 
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
-            }
+## Recipe Category Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with recipe categories; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [add-recipe-category](reference/link-relations/add-recipe-category)
+ * [category-recipes](reference/link-relations/category-recipes)
+ * [delete](reference/link-relations/delete)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * collection
+ * edit
+ * item
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Recipe Category
+
+ * `id`: Unique identifier givent to the recipe category, used to address recipe category resources.
+ * `name`: Name of the category.
+
+## Ingredient Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with ingredients. The following link relations from the clicook namespace are used:
+
+ * [delete](reference/link-relations/delete)
+ * [food-item](reference/link-relations/food-item)
+ * [food-item-equivalent](reference/link-relations/food-item-equivalent)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * edit
+ * item
+ * up
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Ingredient
+
+ * `id`: Unique identifier givent to the ingredient, used to address ingredient resources.
+ * `food_item_category_id`: Identifier of the recipe the ingredient belongs to. Mandatory
+ * `food_item_id`: Identifier of the connected food item. Mandatory
+ * `food_item_equivalent_id` Identifier of the connected food item equivalent. Mandatory
+ * `quantity` Amount of ingredient used in recipe
+ 
+ **Additional properties**
+ 
+ * `emissions` Calculated amount of emissions generated by the ingredient.
+ 
+## Food Item Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with food items; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [add-category-food-item](reference/link-relations/add-category-food-item)
+ * [add-food-item](reference/link-relations/add-food-item)
+ * [add-food-item-equivalent](reference/link-relations/add-food-item-equivalent)
+ * [category-food-items](reference/link-relations/category-food-items)
+ * [delete](reference/link-relations/delete)
+ * [food-item-categories-all](reference/link-relations/food-item)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * collection
+ * edit
+ * item
+ * up
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Food Item
+ 
+ * `id`: Unique identifier givent to the ingredient, used to address ingredient resources. 
+ * `food_item_category_id`: Identifier of the category the food item belongs to. Mandatory
+ * `name`: Name of the food item. Mandatory
+ * `emission_per_kg` Amount of CO2 (kg) emissions generated per kilogram of the food item. Mandatory
+ * `vegan` Value indicates if the product is vegan diet compatible
+ * `organic` Value indicates if the product is organically produced
+ * `domestic` Value indicates if the product is domestically produced
+ 
+## Food Item Equivalent Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with food item equivalents; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [delete](reference/link-relations/delete)
+
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * edit
+ * up
+
+### Semantic Descriptors
+
+#### Data Type Food Item Equivalent
+
+ * `id`: Unique identifier givent to the food item equivalent, used to address food-item-equivalent resources. 
+ * `food_item_id`: Identifier of the food item the food item equivalent belongs to. Mandatory
+ * `unit_type`: Unit amount type (eg. tbs, kg, ml, etc.) . Mandatory
+ * `conversion_factor`: Float value to convert the unit amount type to kilograms of product. Mandatory
+ 
+## Food Item Category Profile
+
+### Link Relations
+
+The following link relations from the clicook namespace are used:
+
+ * [add-food-item-category](reference/link-relations/add-food-item-category)
+ * [delete](reference/link-relations/delete)
+ * [food-items-all](reference/link-relations/food-items-all)
+
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * item
+ * collection
+ * edit
+
+### Semantic Descriptors
+
+#### Data Type Food Item Category
+
+ * `id`: Unique identifier givent to the food item category, used to address food item category resources. 
+ * `name`: Name of the category. Mandatory
