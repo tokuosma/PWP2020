@@ -288,11 +288,9 @@ All of these resources use the [Recipe Profile](reference/profiles/recipe-profil
 
 ## Recipe Collection [/api/recipes/?name={name}]
 
-A list of all albums known to the API. This collection can be sorted using the sortby query parameter. For each album only artist name and title is included, more information can be found by following the `self` relation of each album. Albums cannot be directly added to this collection, it only supports GET.
-
-+ Parameters
-
-    + name (string, optional) - Name to use for filtering results
+A list of all recipes known to the API. This collection can be filtered using the name query parameter. 
+For each recipe only name and recipe category id is included, more information can be found by following the `self` relation of each recipe. 
+Recipes can also be added to the collection using POST.
     
 ### List all recipes [GET]
 Get a list of all recipes
@@ -388,4 +386,90 @@ Get a list of all recipes
                         }
                     }
                 ]
+            }
+
+### Add recipe to collection [POST]
+
+Adds a new recipe to the recipe collection. The recipe representation must be valid against the recipe schema.
+
++ Relation: add-recipe
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Macaronbox with ketchup",
+                "recipe_category_id": 1
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add an album to a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes,
+                "@error": {
+                    "@message": "Recipe category with id '2' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
             }
