@@ -39,8 +39,6 @@ Move to specific food item
 Go to food item category collection
 ## food-item-equivalent
 Move to specific food item equivalent
-## food-item-equivalents
-**TBD**
 ## food-items-all
 Go to food item collection
 ## food-items-with-equivalents
@@ -75,6 +73,7 @@ The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link
  * edit
  * item
  * up
+ * profile
  * self
  
 ### Semantic Descriptors
@@ -105,6 +104,7 @@ The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link
  * collection
  * edit
  * item
+ * profile
  * self
  
 ### Semantic Descriptors
@@ -129,6 +129,7 @@ The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link
 
  * edit
  * item
+ * profile
  * up
  * self
  
@@ -164,6 +165,7 @@ The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link
  * collection
  * edit
  * item
+ * profile
  * up
  * self
  
@@ -190,6 +192,7 @@ This section lists all possible link relations associated with food item equival
 The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
 
  * edit
+ * profile
  * up
 
 ### Semantic Descriptors
@@ -216,10 +219,173 @@ The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link
  * item
  * collection
  * edit
-
+ * profile
 ### Semantic Descriptors
 
 #### Data Type Food Item Category
 
  * `id`: Unique identifier givent to the food item category, used to address food item category resources. 
  * `name`: Name of the category. Mandatory
+ 
+## Error Profile
+
+Profile definition for all errors returned by the API. See [Mason error control](https://github.com/JornWildt/Mason/blob/master/Documentation/Mason-draft-2.md#property-name-error) for more information about errors.
+
++ Attributes
+
+    + resource_url (string, required) - URI of the resource the error was generated from. 
+ 
+  
+# Group Entry
+
+This group contains the entry point of the API
+
+## Entry Point [/api/]
+
+### Get entry point [GET]
+
+Get the API entry point
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+            
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes"
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe_categories"
+                    },
+                    "clicook:food-items-all":{
+                        "href": "/api/food-items"
+                    },
+                    "clicook:food-items-with-equivalents": {
+                        "href": "/api/food-item-equivalents"
+                    },
+                    "clicook:food-categories-all": {
+                        "href": "/api/food-item-categories"
+                    }
+                    
+                }
+            }
+
+# Group Recipes
+
+All of these resources use the [Recipe Profile](reference/profiles/recipe-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Recipe Collection [/api/recipes/?name={name}]
+
+A list of all albums known to the API. This collection can be sorted using the sortby query parameter. For each album only artist name and title is included, more information can be found by following the `self` relation of each album. Albums cannot be directly added to this collection, it only supports GET.
+
++ Parameters
+
+    + name (string, optional) - Name to use for filtering results
+    
+### List all recipes [GET]
+Get a list of all recipes
++ Relation: recipes-all
+
++ Parameters
+    + name (string, optional) - The name string used to filter search results.
+        
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipes/?{name}",
+                        "title": "All recipes",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe-categories",
+                        "title": "All recipe categories"
+                    },
+                    "clicook:add-recipe": {
+                        "href": "/api/recipes",
+                        "title": "Add a new recipe to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe name",
+                                    "type": "string"
+                                },
+                                "recipe_category_id": {
+                                    "description": "Id of the recipe category",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "recipe_category_id": 1
+                        "name": "Macaronbox",
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        },
+                    }, 
+                    {
+                        "id": 1234,
+                        "recipe_category_id": 1,
+                        "name": "Macaronbox with sausage", 
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        }
+                    }
+                ]
+            }
