@@ -945,3 +945,119 @@ Get the ingredients representation.
                     }
                 }
             }
+            
+### Edit ingredient information [PUT]
+
+Replace the ingredient's representation with a new one. Must validate against the ingredient schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "food_item_id": "2",
+                "food_item_equivalent_id": "1",
+                "quantity": 2.5
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/1",
+                "@error": {
+                    "@message": "Invalid ingredient",
+                    "@messages": [
+                        "Food item '666' does not exist."
+                        "Quantity must be positive."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an ingredient or recipet that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+### Delete ingredient [DELETE]
+
+Deletes the ingredient.
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a ingredient that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
