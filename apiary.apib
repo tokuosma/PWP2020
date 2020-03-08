@@ -282,6 +282,353 @@ Get the API entry point
                 }
             }
 
+# Group Recipe Categories
+
+All of these resources use the [Recipe Category Profile](reference/profiles/recipe-category-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Recipe Category Collection [/api/recipe-categories]
+
+### List all recipe categories [GET]
+
+Get a list of all recipe categories.
+
++ Relation: recipe-categories-all
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories"
+                    },
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes/",
+                        "title": "All recipes",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:add-recipe-category": {
+                        "href": "/api/recipe-categories",
+                        "title": "Add a new recipe category to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe category name",
+                                    "type": "string"
+                                }
+                                
+                            },
+                            "required": ["name"]
+                        }
+                    }
+                },
+                "items": [
+                    {
+                        "id": 1,
+                        "name": "Pasta"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipe-categories/1"
+                            } 
+                        },
+                    },
+                    {
+                        "id": 2,
+                        "name": "Pasta"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipe-categories/2"
+                            } 
+                        },
+                    }
+                ]
+            }
+            
+### Add new recipe category [POST]
+
++ Relation: add-recipe-category
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Salads",
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/3
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' cannot be null"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+## Recipe Category [/api/recipe-categories/{recipe_category_id}]
+
+This resource represents a single recipe category, as identified by the recipes's unique id. 
+
++ Parameters
+
+    + recipe_category_id: 123 (number) - category's id
+    
+### Recipe category information [GET]
+
+Get the recipe categories representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": 1,
+                "name": "Pasta",
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories/1"
+                    },        
+                    "edit": {
+                        "href": "/api/recipe-categories/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe category name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/recipe-categories/1"
+                    },
+                    "clicook:category-recipes":{
+                        "href": "/api/recipe-categories/1/recipes",
+                    },
+                    "collection": {
+                        "href": "/api/recipe-categories/"
+                    }
+                }
+            }            
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a recipe category that doesn't exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666"
+                "@error": {
+                    "@message": "Recipe category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+### Edit recipe category information [PUT]
+
+Replace the recipe category's representation with a new one. Must validate against the recipe category schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Pasta recipes "
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/1",
+                "@error": {
+                    "@message": "Invalid recipe",
+                    "@messages": [
+                        "Recipe name cannot be empty."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories/1",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete recipe category [DELETE]
+
+Deletes the recipe category and sets recipe category to null for all linked recipes
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a recipe category that doesn't exist. 
+ 
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666",
+                "@error": {
+                    "@message": "Recipe category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+
 # Group Recipes
 
 All of these resources use the [Recipe Profile](reference/profiles/recipe-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
