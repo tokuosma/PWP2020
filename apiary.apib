@@ -534,17 +534,13 @@ Get the recipes representation.
                     "clicook:delete": {
                         "method": "DELETE",
                         "href": "/api/recipes/123"
-                    }
+                    },
                     "clicook:add-ingredient":{
                         "href": "/api/recipes/123/",
                         "method": "POST",
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "recipe_id": {
-                                    "description": "Id of the recipe",
-                                    "type": "integer"
-                                },
                                 "food_item_id": {
                                     "description": "Id of the food item",
                                     "type": "integer"
@@ -560,7 +556,7 @@ Get the recipes representation.
                                 }
                                 
                             },
-                            "required": ["name"]
+                            "required": ["food_item_id", "food_item_equivalent_id", "quantity"]
                         }
                     },
                     "collection": {
@@ -826,6 +822,126 @@ Adds a new ingredient to the recipe. The ingredient representation must be valid
                 "@controls": {
                     "profile": {
                         "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+# Group Ingredients
+
+Ingredient resource uses the [Ingredient Profile](reference/profiles/ingredient-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Ingredient [/api/recipes/{recipeid}/ingredients/{ingredientid}]
+
+This resource represents a single recipe, as identified by the recipes's unique id. It includes the list of ingredients in addition to the recipes own metadata. 
+
++ Parameters
+
+    + recipeid: 123 (number) - recipes' id
+    + ingredientid: 1 (number) -ingredients' id
+    
+### Ingredient information [GET]
+
+Get the ingredients representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": "1",
+                "recipe_id": 123,
+                "food_item_id": 1,
+                "food_item_equivalent_id" : 1,
+                "quantity" : 1,
+                "food_item_name": "Macaron",
+                "food_item_unit": "kg",
+                "emissions": 2.51,
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipes/123/ingredients/1"
+                    },        
+                    "edit": {
+                        "href": "/api/recipes/123/ingredients/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "food_item_equivalent_id": {
+                                    "description": "Id of the food item equivalent",
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "description": "Quantity of the ingredient",
+                                    "type": "float",
+                                    "pattern": "^(?:[1-9]\d*|0)?(?:\.\d+)?$"
+                                }
+                            },
+                            "required": ["food_item_id", "food_item_equivalent_id", "quantity"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/recipes/123/ingredients/1"
+                    },
+                    "up": {
+                        "href": "/api/recipes/123"
+                    },
+                    "clicook:food-item":{
+                        "href": "/api/food-items/1"
+                    },
+                    "clicook:food-item-equivalent":{
+                        "href": "/api/food-items/1/food-item-equivalents/1"
+                    },
+                    "clicook:food-items-with-equivalents":{
+                        "href": "/api/food-item-equivalents"
+                        "title": "All food items with their equivalents",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    }
+                    
+                }
+            }            
+
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access an ingredient or a recipe that does not exist.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666"
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
                     }
                 }
             }
