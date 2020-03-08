@@ -784,7 +784,7 @@ Adds a new recipe to the recipe collection. The recipe representation must be va
 
 + Response 404 (application/vnd.mason+json)
 
-    The client is trying to add an album to a recipe category that does not exist
+    The client is trying to add an recipe to a recipe category that does not exist
 
     + Body
     
@@ -911,6 +911,9 @@ Get the recipes representation.
                     },
                     "up": {
                         "href": "/api/recipe-categories/1/"
+                    },
+                    "clicook:category-recipes":{
+                        "href": "/api/recipe-categories/1/recipes"
                     },
                     "clicook:recipe-categories-all:{
                         "href": "/api/recipe-categories"
@@ -1172,6 +1175,204 @@ Adds a new ingredient to the recipe. The ingredient representation must be valid
                     }
                 }
             }
+
+## Recipe Category Recipes Collection [/api/recipe-categories/{recipe_category_id}/recipes]
+
+A list of all recipes known to the API listed under a category. Recipes can also be added to the collection using POST.
+
++ Parameters
+
+    + recipe_category_id: 1 (number) - recipe category's id
+
+    
+### List all category recipes [GET]
+Get a list of all recipes in the category
++ Relation: category-recipes
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "name": "Pasta",
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories/1/recipes"
+                    },
+                    "up": {
+                        "href": "/api/recipe-categories/1"
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe-categories",
+                        "title": "All recipe categories"
+                    },
+                    "clicook:add-category-recipe": {
+                        "href": "/api/recipe-categories/1/recipes",
+                        "title": "Add a new recipe to the category",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes"
+                    }
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "name": "Macaronbox",
+                        "emissions_total": 2.51,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        },
+                    }, 
+                    {
+                        "id": 1234,
+                        "name": "Macaronbox with sausage",
+                        "emissions_total": 5.5,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        }
+                    }
+                ]
+            }
+            
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666,
+                "@error": {
+                    "@message": "Recipe category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
+### Add recipe to category [POST]
+
+Adds a new recipe to the recipe category. The recipe representation must be valid against the recipe schema.
+
++ Relation: add-recipe
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Macaronbox with ketchup",
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/1/recipes",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a recipe to a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666/recipes,
+                "@error": {
+                    "@message": "Recipe category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories/1/recipes",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
 
 # Group Ingredients
 
