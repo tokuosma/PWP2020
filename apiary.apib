@@ -3,7 +3,7 @@ HOST: https://localhost:5000/
 
 # ClimateCook API
 
-ClimateCook is a simple API allowing consumers to browse recipes and get an estimate
+ClimateCook is a simple API allowing people to browse recipes and get an estimate
 of the carbon footprint for each recipe.
 
 # Group Link Relations
@@ -534,13 +534,59 @@ Get the recipes representation.
                     "clicook:delete": {
                         "method": "DELETE",
                         "href": "/api/recipes/123"
+                    }
+                    "clicook:add-ingredient":{
+                        "href": "/api/recipes/123/",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "recipe_id": {
+                                    "description": "Id of the recipe",
+                                    "type": "integer"
+                                },
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "food_item_equivalent_id": {
+                                    "description": "Id of the food item equivalent",
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "description": "Quantity of the ingredient",
+                                    "type": "float",
+                                    "pattern": "^(?:[1-9]\d*|0)?(?:\.\d+)?$"
+                                }
+                                
+                            },
+                            "required": ["name"]
+                        }
                     },
                     "collection": {
                         "href": "/api/recipes/"
                     },
                     "up": {
                         "href": "/api/recipe-categories/1/"
+                    },
+                    "clicook:recipe-categories-all:{
+                        "href": "/api/recipe-categories"
+                    },
+                    "clicook:food-items-with-equivalents":{
+                        "href": "/api/food-item-equivalents"
+                        "title": "All food items with their equivalents",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
                     }
+                    
                 },
                 "items": [
                     {
@@ -577,6 +623,209 @@ Get the recipes representation.
                 "@controls": {
                     "profile": {
                         "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+### Edit recipe information [PUT]
+
+Replace the recipe's representation with a new one. Must validate against the recipe schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "recipe_category_id": "2",
+                "name": "Lasagna"
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Invalid recipe",
+                    "@messages": [
+                        "Recipe name cannot be empty."
+                        "Recipe category '666' does not exist."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete recipe [DELETE]
+
+Deletes the recipe, and all associated ingredients.
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+### Add ingredient to recipe [POST]
+
+Adds a new ingredient to the recipe. The ingredient representation must be valid against the ingredient schema.
+
++ Relation: add-ingredient
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "food_item_id": 1,
+                "food_item_equivalent": 2,
+                "quantity": 1.0,
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/123/ingredients/2
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [
+                        "Food item '666' does not exist.",
+                        "Quantity must be positive."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a ingredient to recipe that does not exist.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+        
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
                     }
                 }
             }
