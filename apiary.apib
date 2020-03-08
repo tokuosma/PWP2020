@@ -1061,3 +1061,88 @@ Deletes the ingredient.
                     }
                 }
             }
+            
+# Group Food Items
+
+## FoodItemsWithEquivalents [/api/food-item-equivalents?name={name}]
+
+This resource is a collection of food item - equivalent pairs. 
+
+### Get food items with equivalents [GET]
+
+Get all food item - equivalent pairs. 
+
++ Relation: food-items-with-equivalents
+
++ Parameters
+    + name (string, optional) - The name string used to filter search results.
+    
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-item-equivalents"
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    ,
+                },
+                "items" : [
+                    {
+                        "food_item_id": "1",
+                        "food_item_equivalent_id": 1,
+                        "food_item_name": "Macaron",
+                        "emission_per_kg": 2.51
+                        "unit_type": "g"
+                        "conversion_factor": 0.001
+                        "emissions_per_unit": 0.00251,
+                        "@controls": {
+                            "clicook:food-item":{
+                            "href": "/api/food-items/1"
+                            },
+                            "clicook:food-item-equivalent":{
+                                "href": "/api/food-items/1/food-item-equivalents/1"
+                            }
+                        }
+                    },
+                    {
+                        "food_item_id": "1",
+                        "food_item_equivalent_id": 2,
+                        "food_item_name": "Macaron",
+                        "emission_per_kg": 2.51
+                        "unit_type": "kg"
+                        "conversion_factor": 1.00
+                        "emissions_per_unit": 2.51,
+                        "@controls": {
+                            "clicook:food-item":{
+                            "href": "/api/food-items/1"
+                            },
+                            "clicook:food-item-equivalent":{
+                                "href": "/api/food-items/1/food-item-equivalents/2"
+                            }
+                        }
+                    }
+                ]
+            }
