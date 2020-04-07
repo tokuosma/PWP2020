@@ -27,10 +27,10 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    from . import models
+    from climatecook import models
     app.cli.add_command(models.init_db_command)
 
-    from . import api
+    from climatecook import api
     app.register_blueprint(api.api_bp)
 
     return app

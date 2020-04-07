@@ -16,7 +16,7 @@ from climatecook.resources.recipes import RecipeCollection, RecipeItem
 from climatecook.resources.masonbuilder import MasonBuilder
 
 api.add_resource(RecipeCollection, "/recipes/")
-api.add_resource(RecipeItem, "/recipes/<recipe>/")
+api.add_resource(RecipeItem, "/recipes/<id>/")
 
 
 @api_bp.route("/")

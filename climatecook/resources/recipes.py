@@ -1,6 +1,6 @@
 import json
 
-from flask import Response
+from flask import request, Response
 from flask_restful import Resource
 
 from climatecook import db
@@ -21,14 +21,38 @@ class RecipeCollection(Resource):
         recipes = Recipe.query.order_by(Recipe.name).all()
         for recipe in recipes:
             item = RecipeBuilder()
+            item['name'] = recipe.name
             item.add_control("self", api.url_for(RecipeItem, id=recipe.id))
             item.add_control("profile", "/api/profiles/")
+            items.append(item)
 
         body["items"] = items
         return Response(json.dumps(body), 200, mimetype=MASON)
 
     def post(self):
-        pass
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON")
+
+        keys = request.json.keys()
+        if 'name' not in keys:
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", ["Missing field:name"])
+
+        name = request.json['name']
+        if len(name) < 1:
+            return MasonBuilder.get_error_response(400, "Name is too short")
+        elif len(name) > 64:
+            return MasonBuilder.get_error_response(400, "Name is too long")
+
+        recipe = Recipe(
+            name=name
+        )
+        db.session.add(recipe)
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(RecipeItem, id=recipe.id)
+        }
+        response = Response(status=201, headers=headers)
+        return response
 
 
 class RecipeItem(Resource):

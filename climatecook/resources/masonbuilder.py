@@ -1,3 +1,8 @@
+import json
+    
+from flask import Response
+
+
 class MasonBuilder(dict):
     """
     A convenience class for managing dictionaries that represent Mason
@@ -61,3 +66,17 @@ class MasonBuilder(dict):
 
         self["@controls"][ctrl_name] = kwargs
         self["@controls"][ctrl_name]["href"] = href
+
+    @staticmethod
+    def get_error_response(status: int, message, details):
+        """
+        Get a response object built using given parameters
+
+        : param int status: HTTP status code
+        : param string status: Primary error message
+        : param str details: Longer human-readable description
+        """
+        error = MasonBuilder()
+        error.add_error(title=message, details=details)
+        error.add_control("profile", "/api/profiles/")
+        return Response(json.dumps(error), status, mimetype="application/vnd.mason+json")
