@@ -1,0 +1,2922 @@
+FORMAT: 1A
+HOST: https://localhost:5000/
+
+# ClimateCook API
+
+ClimateCook is a simple API allowing people to browse recipes and get an estimate
+of the carbon footprint for each recipe.
+
+# Group Link Relations
+
+This section described custom link relations defined in this API. These are not resources. The API also uses 
+[IANA link relations](http://www.iana.org/assignments/link-relations/link-relations.xhtml) where applicable. Custom link relations are CURIEs that use the clicook: prefix. 
+
+## add-category-food-item
+Add a food item to a specific category
+## add-category-recipe
+Add a recipe to a specific category
+## add-food-item
+Add a new food item to collection
+## add-food-item-category
+Add a new food item category to collection
+## add-food-item-equivalent
+Add new food item equivalent for food item
+## add-ingredient
+Add a new ingredient to a recipe
+## add-recipe
+Add a new recipe to recipe collection
+## add-recipe-category
+Add a new recipe category to collection using.
+## category-food-items
+Go to collection of food items in a specific category
+## category-recipes
+Go to a collection of recipes in a specific category
+## delete
+Delete the associated resource
+## food-item
+Move to specific food item
+## food-item-categories-all
+Go to food item category collection
+## food-item-equivalent
+Move to specific food item equivalent
+## food-items-all
+Go to food item collection
+## food-items-with-equivalents
+Go to a collection that returns the food items combined with their equivalents
+## recipe-categories-all
+Move to recipe category collection
+## recipes-all
+Go to the recipe collection
+
+# Group Profiles
+
+This section includes resource profiles which provide semantic descriptions for the attributes of each resource, as well as the list of controls (by link relation) available from that resource.
+
+## Recipe Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with recipes; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [add-category-recipe](reference/link-relations/add-category-recipe)
+ * [add-ingredient](reference/link-relations/add-ingredient)
+ * [add-recipe](reference/link-relations/add-recipe)
+ * [category-recipes](reference/link-relations/category-recipes)
+ * [food-items-all](reference/link-relations/food-items-all)
+ * [delete](reference/link-relations/delete)
+ * [recipe-categories-all](reference/link-relations/recipe-categories-all)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * collection
+ * edit
+ * item
+ * up
+ * profile
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Recipe
+
+ * `id`: Unique identifier givent to the recipe, used to address recipe resources.
+ * `recipe_category_id`: Unique identifier of the category the recipe belongs to.
+ * `name`: Name of the recipe.
+  
+ **Additional properties**
+ * `emissions_total`: Calculated sum of CO2 emissions of the recipe ingredients. 
+ 
+
+## Recipe Category Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with recipe categories; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [add-recipe-category](reference/link-relations/add-recipe-category)
+ * [category-recipes](reference/link-relations/category-recipes)
+ * [delete](reference/link-relations/delete)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * collection
+ * edit
+ * item
+ * profile
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Recipe Category
+
+ * `id`: Unique identifier givent to the recipe category, used to address recipe category resources.
+ * `name`: Name of the category.
+
+## Ingredient Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with ingredients. The following link relations from the clicook namespace are used:
+
+ * [delete](reference/link-relations/delete)
+ * [food-item](reference/link-relations/food-item)
+ * [food-item-equivalent](reference/link-relations/food-item-equivalent)
+ * [recipes-all](reference/link-relations/recipes-all)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * edit
+ * item
+ * profile
+ * up
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Ingredient
+
+ * `id`: Unique identifier givent to the ingredient, used to address ingredient resources.
+ * `food_item_id`: Identifier of the connected food item. Mandatory
+ * `food_item_equivalent_id` Identifier of the connected food item equivalent. Mandatory
+ * `quantity` Amount of ingredient used in recipe
+ 
+ **Additional properties**
+ * `food_item_name` Name of the food item
+ * `food_item_unit` Unit of the food item (eg. kg, ml, tbs, etc.)
+ * `emissions` Calculated amount of emissions generated by the ingredient.
+ 
+## Food Item Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with food items; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [add-category-food-item](reference/link-relations/add-category-food-item)
+ * [add-food-item](reference/link-relations/add-food-item)
+ * [add-food-item-equivalent](reference/link-relations/add-food-item-equivalent)
+ * [category-food-items](reference/link-relations/category-food-items)
+ * [delete](reference/link-relations/delete)
+ * [food-item-categories-all](reference/link-relations/food-item)
+ 
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * collection
+ * edit
+ * item
+ * profile
+ * up
+ * self
+ 
+### Semantic Descriptors
+
+#### Data Type Food Item
+ 
+ * `id`: Unique identifier givent to the ingredient, used to address ingredient resources. 
+ * `food_item_category_id`: Identifier of the category the food item belongs to. Mandatory
+ * `name`: Name of the food item. Mandatory
+ * `emission_per_kg` Amount of CO2 (kg) emissions generated per kilogram of the food item. Mandatory
+ * `vegan` Value indicates if the product is vegan diet compatible
+ * `organic` Value indicates if the product is organically produced
+ * `domestic` Value indicates if the product is domestically produced
+ 
+## Food Item Equivalent Profile
+
+### Link Relations
+
+This section lists all possible link relations associated with food item equivalents; not all of them are necessarily present on each resource type. The following link relations from the clicook namespace are used:
+
+ * [delete](reference/link-relations/delete)
+
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * edit
+ * profile
+ * up
+
+### Semantic Descriptors
+
+#### Data Type Food Item Equivalent
+
+ * `id`: Unique identifier givent to the food item equivalent, used to address food-item-equivalent resources. 
+ * `food_item_id`: Identifier of the food item the food item equivalent belongs to. Mandatory
+ * `unit_type`: Unit amount type (eg. tbs, kg, ml, etc.) . Mandatory
+ * `conversion_factor`: Float value to convert the unit amount type to kilograms of product. Mandatory
+ 
+## Food Item Category Profile
+
+### Link Relations
+
+The following link relations from the clicook namespace are used:
+
+ * [add-food-item-category](reference/link-relations/add-food-item-category)
+ * [delete](reference/link-relations/delete)
+ * [food-items-all](reference/link-relations/food-items-all)
+
+The following [IANA RFC5988](http://www.iana.org/assignments/link-relations/link-relations.xhtml) link relations are also used:
+
+ * item
+ * collection
+ * edit
+ * profile
+### Semantic Descriptors
+
+#### Data Type Food Item Category
+
+ * `id`: Unique identifier givent to the food item category, used to address food item category resources. 
+ * `name`: Name of the category. Mandatory
+ 
+## Error Profile
+
+Profile definition for all errors returned by the API. See [Mason error control](https://github.com/JornWildt/Mason/blob/master/Documentation/Mason-draft-2.md#property-name-error) for more information about errors.
+
++ Attributes
+
+    + resource_url (string, required) - URI of the resource the error was generated from. 
+ 
+  
+# Group Entry
+
+This group contains the entry point of the API
+
+## Entry Point [/api/]
+
+### Get entry point [GET]
+
+Get the API entry point
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+            
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes"
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe_categories"
+                    },
+                    "clicook:food-items-all":{
+                        "href": "/api/food-items"
+                    },
+                    "clicook:food-items-with-equivalents": {
+                        "href": "/api/food-item-equivalents"
+                    },
+                    "clicook:food-categories-all": {
+                        "href": "/api/food-item-categories"
+                    }
+                    
+                }
+            }
+
+# Group Recipe Categories
+
+All of these resources use the [Recipe Category Profile](reference/profiles/recipe-category-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Recipe Category Collection [/api/recipe-categories]
+
+### List all recipe categories [GET]
+
+Get a list of all recipe categories.
+
++ Relation: recipe-categories-all
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories"
+                    },
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes/",
+                        "title": "All recipes",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:add-recipe-category": {
+                        "href": "/api/recipe-categories",
+                        "title": "Add a new recipe category to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe category name",
+                                    "type": "string"
+                                }
+                                
+                            },
+                            "required": ["name"]
+                        }
+                    }
+                },
+                "items": [
+                    {
+                        "id": 1,
+                        "name": "Pasta"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipe-categories/1"
+                            } 
+                        },
+                    },
+                    {
+                        "id": 2,
+                        "name": "Pasta"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipe-categories/2"
+                            } 
+                        },
+                    }
+                ]
+            }
+            
+### Add new recipe category [POST]
+
++ Relation: add-recipe-category
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Salads",
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/3
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' cannot be null"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+## Recipe Category [/api/recipe-categories/{recipe_category_id}]
+
+This resource represents a single recipe category, as identified by the recipes's unique id. 
+
++ Parameters
+
+    + recipe_category_id: 123 (number) - category's id
+    
+### Recipe category information [GET]
+
+Get the recipe categories representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": 1,
+                "name": "Pasta",
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories/1"
+                    },        
+                    "edit": {
+                        "href": "/api/recipe-categories/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe category name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/recipe-categories/1"
+                    },
+                    "clicook:category-recipes":{
+                        "href": "/api/recipe-categories/1/recipes",
+                    },
+                    "collection": {
+                        "href": "/api/recipe-categories/"
+                    }
+                }
+            }            
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a recipe category that doesn't exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666"
+                "@error": {
+                    "@message": "Recipe category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+### Edit recipe category information [PUT]
+
+Replace the recipe category's representation with a new one. Must validate against the recipe category schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Pasta recipes "
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/1",
+                "@error": {
+                    "@message": "Invalid recipe",
+                    "@messages": [
+                        "Recipe name cannot be empty."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories/1",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete recipe category [DELETE]
+
+Deletes the recipe category and sets recipe category to null for all linked recipes
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a recipe category that doesn't exist. 
+ 
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666",
+                "@error": {
+                    "@message": "Recipe category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+
+# Group Recipes
+
+All of these resources use the [Recipe Profile](reference/profiles/recipe-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Recipe Collection [/api/recipes/?name={name}]
+
+A list of all recipes known to the API. This collection can be filtered using the name query parameter. 
+For each recipe only name and recipe category id is included, more information can be found by following the `self` relation of each recipe. 
+Recipes can also be added to the collection using POST.
+    
+### List all recipes [GET]
+Get a list of all recipes
++ Relation: recipes-all
+
++ Parameters
+    + name (string, optional) - The name string used to filter search results.
+        
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipes/?{name}",
+                        "title": "All recipes",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe-categories",
+                        "title": "All recipe categories"
+                    },
+                    "clicook:add-recipe": {
+                        "href": "/api/recipes",
+                        "title": "Add a new recipe to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe name",
+                                    "type": "string"
+                                },
+                                "recipe_category_id": {
+                                    "description": "Id of the recipe category",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "recipe_category_id": 1
+                        "name": "Macaronbox",
+                        "emissions_total": 2.51,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        },
+                    }, 
+                    {
+                        "id": 1234,
+                        "recipe_category_id": 1,
+                        "name": "Macaronbox with sausage",
+                        "emissions_total": 5.5,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        }
+                    }
+                ]
+            }
+
+### Add recipe to collection [POST]
+
+Adds a new recipe to the recipe collection. The recipe representation must be valid against the recipe schema.
+
++ Relation: add-recipe
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Macaronbox with ketchup",
+                "recipe_category_id": 1
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add an recipe to a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes,
+                "@error": {
+                    "@message": "Recipe category with id '2' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+## Recipe [/api/recipes/{recipeid}]
+
+This resource represents a single recipe, as identified by the recipes's unique id. It includes the list of ingredients in addition to the recipes own metadata. 
+
++ Parameters
+
+    + recipeid: 123 (number) - recipes id
+    
+### Recipe information [GET]
+
+Get the recipes representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": 123,
+                "recipe_category_id": 1
+                "name": "Macaronbox",
+                "emissions_total": 2.51,
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipes/123"
+                    },        
+                    "edit": {
+                        "href": "/api/recipes/123/",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe name",
+                                    "type": "string"
+                                },
+                                "recipe_category_id": {
+                                    "description": "Id of the recipe category",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/recipes/123"
+                    },
+                    "clicook:add-ingredient":{
+                        "href": "/api/recipes/123/",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "food_item_equivalent_id": {
+                                    "description": "Id of the food item equivalent",
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "description": "Quantity of the ingredient",
+                                    "type": "float",
+                                    "pattern": "^(?:[1-9]\d*|0)?(?:\.\d+)?$"
+                                }
+                                
+                            },
+                            "required": ["food_item_id", "food_item_equivalent_id", "quantity"]
+                        }
+                    },
+                    "collection": {
+                        "href": "/api/recipes/"
+                    },
+                    "up": {
+                        "href": "/api/recipe-categories/1/"
+                    },
+                    "clicook:category-recipes":{
+                        "href": "/api/recipe-categories/1/recipes"
+                    },
+                    "clicook:recipe-categories-all:{
+                        "href": "/api/recipe-categories"
+                    },
+                    "clicook:food-items-with-equivalents":{
+                        "href": "/api/food-item-equivalents"
+                        "title": "All food items with their equivalents",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    }
+                    
+                },
+                "items": [
+                    {
+                        "id": "1",
+                        "recipe_id": 123,
+                        "food_item_id": 1,
+                        "food_item_equivalent_id" : 1,
+                        "quantity" : 1,
+                        "food_item_name": "Macaron",
+                        "food_item_unit": "kg",
+                        "emissions": 2.51,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/123/ingredients/1/"
+                            }
+                        }
+                    }
+                ]
+            }            
+
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a recipe that doesn't exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666"
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+### Edit recipe information [PUT]
+
+Replace the recipe's representation with a new one. Must validate against the recipe schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "recipe_category_id": "2",
+                "name": "Lasagna"
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Invalid recipe",
+                    "@messages": [
+                        "Recipe name cannot be empty."
+                        "Recipe category '666' does not exist."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete recipe [DELETE]
+
+Deletes the recipe, and all associated ingredients.
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+### Add ingredient to recipe [POST]
+
+Adds a new ingredient to the recipe. The ingredient representation must be valid against the ingredient schema.
+
++ Relation: add-ingredient
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "food_item_id": 1,
+                "food_item_equivalent": 2,
+                "quantity": 1.0,
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/123/ingredients/2
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [
+                        "Food item '666' does not exist.",
+                        "Quantity must be positive."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a ingredient to recipe that does not exist.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+        
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+## Recipe Category Recipes Collection [/api/recipe-categories/{recipe_category_id}/recipes]
+
+A list of all recipes known to the API listed under a category. Recipes can also be added to the collection using POST.
+
++ Parameters
+
+    + recipe_category_id: 1 (number) - recipe category's id
+
+    
+### List all category recipes [GET]
+Get a list of all recipes in the category
++ Relation: category-recipes
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "name": "Pasta",
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipe-categories/1/recipes"
+                    },
+                    "up": {
+                        "href": "/api/recipe-categories/1"
+                    },
+                    "clicook:recipe-categories-all": {
+                        "href": "/api/recipe-categories",
+                        "title": "All recipe categories"
+                    },
+                    "clicook:add-category-recipe": {
+                        "href": "/api/recipe-categories/1/recipes",
+                        "title": "Add a new recipe to the category",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Recipe name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:recipes-all": {
+                        "href": "/api/recipes"
+                    }
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "name": "Macaronbox",
+                        "emissions_total": 2.51,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        },
+                    }, 
+                    {
+                        "id": 1234,
+                        "name": "Macaronbox with sausage",
+                        "emissions_total": 5.5,
+                        "@controls": {
+                            "self": {
+                                "href": "/api/recipes/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/recipe/"
+                            }
+                        }
+                    }
+                ]
+            }
+            
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666,
+                "@error": {
+                    "@message": "Recipe category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
+### Add recipe to category [POST]
+
+Adds a new recipe to the recipe category. The recipe representation must be valid against the recipe schema.
+
++ Relation: add-category-recipe
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Macaronbox with ketchup",
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/1/recipes",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a recipe to a recipe category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipe-categories/666/recipes,
+                "@error": {
+                    "@message": "Recipe category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipe-categories/1/recipes",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+
+# Group Ingredients
+
+Ingredient resource uses the [Ingredient Profile](reference/profiles/ingredient-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Ingredient [/api/recipes/{recipeid}/ingredients/{ingredientid}]
+
+This resource represents a single ingredient, as identified by the ingredient's unique id. It includes the fooditem and the quantity of the fooditem in addition to the appropriate fooditem equivalent. 
+
++ Parameters
+
+    + recipeid: 123 (number) - recipes' id
+    + ingredientid: 1 (number) -ingredients' id
+    
+### Ingredient information [GET]
+
+Get the ingredients representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": "1",
+                "recipe_id": 123,
+                "food_item_id": 1,
+                "food_item_equivalent_id" : 1,
+                "quantity" : 1,
+                "food_item_name": "Macaron",
+                "food_item_unit": "kg",
+                "emissions": 2.51,
+                "@controls": {
+                    "self": {
+                        "href": "/api/recipes/123/ingredients/1"
+                    },        
+                    "edit": {
+                        "href": "/api/recipes/123/ingredients/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "food_item_equivalent_id": {
+                                    "description": "Id of the food item equivalent",
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "description": "Quantity of the ingredient",
+                                    "type": "float",
+                                    "pattern": "^(?:[1-9]\d*|0)?(?:\.\d+)?$"
+                                }
+                            },
+                            "required": ["food_item_id", "food_item_equivalent_id", "quantity"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/recipes/123/ingredients/1"
+                    },
+                    "up": {
+                        "href": "/api/recipes/123"
+                    },
+                    "clicook:food-item":{
+                        "href": "/api/food-items/1"
+                    },
+                    "clicook:food-item-equivalent":{
+                        "href": "/api/food-items/1/food-item-equivalents/1"
+                    },
+                    "clicook:food-items-with-equivalents":{
+                        "href": "/api/food-item-equivalents"
+                        "title": "All food items with their equivalents",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    }
+                    
+                }
+            }            
+
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access an ingredient or a recipe that does not exist.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666"
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+### Edit ingredient information [PUT]
+
+Replace the ingredient's representation with a new one. Must validate against the ingredient schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "food_item_id": "2",
+                "food_item_equivalent_id": "1",
+                "quantity": 2.5
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/1",
+                "@error": {
+                    "@message": "Invalid ingredient",
+                    "@messages": [
+                        "Food item '666' does not exist."
+                        "Quantity must be positive."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an ingredient or recipe that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+### Delete ingredient [DELETE]
+
+Deletes the ingredient.
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a ingredient that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/123/ingredients/666",
+                "@error": {
+                    "@message": "Ingredient not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+# Group Food Items
+
+## FoodItemsWithEquivalents [/api/food-item-equivalents?name={name}]
+
+This resource is a collection of food item - equivalent pairs. 
+
+### Get food items with equivalents [GET]
+
+Get all food item - equivalent pairs. 
+
++ Relation: food-items-with-equivalents
+
++ Parameters
+    + name (string, optional) - The name string used to filter search results.
+    
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-item-equivalents"
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    ,
+                },
+                "items" : [
+                    {
+                        "food_item_id": "1",
+                        "food_item_equivalent_id": 1,
+                        "food_item_name": "Macaron",
+                        "emission_per_kg": 2.51
+                        "unit_type": "g"
+                        "conversion_factor": 0.001
+                        "emissions_per_unit": 0.00251,
+                        "@controls": {
+                            "clicook:food-item":{
+                            "href": "/api/food-items/1"
+                            },
+                            "clicook:food-item-equivalent":{
+                                "href": "/api/food-items/1/food-item-equivalents/1"
+                            }
+                        }
+                    },
+                    {
+                        "food_item_id": "1",
+                        "food_item_equivalent_id": 2,
+                        "food_item_name": "Macaron",
+                        "emission_per_kg": 2.51
+                        "unit_type": "kg"
+                        "conversion_factor": 1.00
+                        "emissions_per_unit": 2.51,
+                        "@controls": {
+                            "clicook:food-item":{
+                            "href": "/api/food-items/1"
+                            },
+                            "clicook:food-item-equivalent":{
+                                "href": "/api/food-items/1/food-item-equivalents/2"
+                            }
+                        }
+                    }
+                ]
+            }         
+            
+# Group Food item Categories
+
+All of these resources use the [Food Item Category Profile](reference/profiles/food-item-category-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Food Item Category Collection [/api/food-item-categories]
+
+### List all food item categories [GET]
+
+Get a list of all food item categories.
+
++ Relation: food-item-categories-all
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-item-categories"
+                    },
+                    "clicook:food-items-all": {
+                        "href": "/api/recipes/",
+                        "title": "All food items",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:add-food-item-category": {
+                        "href": "/api/food-item-categories",
+                        "title": "Add a new food item category to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Food item category name",
+                                    "type": "string"
+                                }
+                                
+                            },
+                            "required": ["name"]
+                        }
+                    }
+                },
+                "items": [
+                    {
+                        "id": 1,
+                        "name": "Proteins"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-item-categories/1"
+                            } 
+                        },
+                    },
+                    {
+                        "id": 2,
+                        "name": "Fruits"
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-item-categories/2"
+                            } 
+                        },
+                    }
+                ]
+            }
+            
+### Add new food item category [POST]
+
++ Relation: add-food-item-category
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Spices",
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/recipes/3
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' cannot be null"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-item-categories",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+## Food Item Category [/api/food-item-categories/{food_item_category_id}]
+
+This resource represents a single food item category, as identified by the food item's unique id. 
+
++ Parameters
+
+    + food_item_category_id: 123 (number) - category's id
+    
+### Food item category information [GET]
+
+Get the food item categories representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": 1,
+                "name": "Pasta",
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-item-categories/1"
+                    },        
+                    "edit": {
+                        "href": "/api/food-item-categories/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Food item category name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/food-item-categories/1"
+                    },
+                    "clicook:category-food-items":{
+                        "href": "/api/food-item-categories/1/food-items",
+                    },
+                    "collection": {
+                        "href": "/api/food-item-categories/"
+                    }
+                }
+            }            
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a food item category that doesn't exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/666"
+                "@error": {
+                    "@message": "Food item category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+### Edit food item category information [PUT]
+
+Replace the food item category's representation with a new one. Must validate against the food item category schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Sources of protein "
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/1",
+                "@error": {
+                    "@message": "Invalid food item",
+                    "@messages": [
+                        "Recipe name cannot be empty."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit an food item that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/666",
+                "@error": {
+                    "@message": "Food item not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-item-categories/1",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete food item category [DELETE]
+
+Deletes the food item category and sets food item category to null for all linked food items
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a food item category that doesn't exist. 
+ 
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/666",
+                "@error": {
+                    "@message": "Food item category not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+            
+# Group Food items
+
+All of these resources use the [Food Item Profile](reference/profiles/food-item-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Food Item Collection [/api/food-items/?name={name}]
+
+A list of all food items known to the API. This collection can be filtered using the name query parameter. 
+For each food item only name and food item category id is included, more information can be found by following the `self` relation of each recipe. 
+Food items can also be added to the collection using POST.
+    
+### List all food items [GET]
+Get a list of all food item
++ Relation: food-items-all
+
++ Parameters
+    + name (string, optional) - The name string used to filter search results.
+        
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-items/?{name}",
+                        "title": "All food items",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name to use for filtering results",
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "clicook:food-item-categories-all": {
+                        "href": "/api/food-item-categories",
+                        "title": "All food item categories"
+                    },
+                    "clicook:add-food-item": {
+                        "href": "/api/food-items",
+                        "title": "Add a new food item to the collections",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name",
+                                    "type": "string"
+                                },
+                                "recipe_category_id": {
+                                    "description": "Id of the food item category",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "food_item_category_id": 1
+                        "name": "Beef",
+                        "emissions_total": 1.22,
+                        "vegan": "False",
+                        "organic": "True",
+                        "domestic": "True",
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-items/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/food-items/"
+                            }
+                        },
+                    }, 
+                    {
+                        "id": 1234,
+                        "food_item_category_id": 1,
+                        "name": "Chicken breast",
+                        "emissions_total": 0.88,
+                        "vegan": "False",
+                        "organic": "False",
+                        "domestic": "True",
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-items/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/food-items/"
+                            }
+                        }
+                    }
+                ]
+            }
+
+### Add food item to collection [POST]
+
+Adds a new food item to the food item collection. The food item representation must be valid against the food item schema.
+
++ Relation: add-food-item
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Turkey breast",
+                "food_item_category_id": 1.
+                "emission_per_kg": 0.96,
+                "vegan": "False",
+                "organic": "False",
+                "domestic": "False"
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/food-items/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a food item to a food item category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items,
+                "@error": {
+                    "@message": "Food item category with id '2' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-items",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+## Food item [/api/food-items/{food_item_id}]
+
+This resource represents a single food item, as identified by the food item's unique id. It contains the metadata of the food item.
+
++ Parameters
+
+    + food_item_id: 123 (number) - food items id
+    
+### Food item information [GET]
+
+Get the food items representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": 123,
+                "food_item_category_id": 1
+                "name": "Beef",
+                "emissions_per_kg": 1.22,
+                "vegan": "False",
+                "organic": "True",
+                "domestic": "True",
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-items/123"
+                    },        
+                    "edit": {
+                        "href": "/api/food-items/123/",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name",
+                                    "type": "string"
+                                },
+                                "food_item_category_id": {
+                                    "description": "Id of the food item category",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/food-items/123"
+                    },
+                    "clicook:add-equivalent":{
+                        "href": "/api/food-items/123/",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "food_item_equivalent_id": {
+                                    "description": "Id of the food item equivalent",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["food_item_id", "food_item_equivalent_id"]
+                        }
+                    },
+                    "collection": {
+                        "href": "/api/food-items/"
+                    },
+                    "up": {
+                        "href": "/api/food-item-categories/1/"
+                    },
+                    "clicook:category-food-items":{
+                        "href": "/api/food-items-categories/1/food-items"
+                    },
+                    "clicook:food-item-categories-all:{
+                        "href": "/api/food-item-categories"
+                    },
+                }
+            }       
+
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a food item that doesn't exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/666"
+                "@error": {
+                    "@message": "Food item not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+### Edit food item information [PUT]
+
+Replace the food item's representation with a new one. Must validate against the food item schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "food_item_id": "2",
+                "name": "Chicken breast",
+                "emission_per_kg": 2.00,
+                "vegan": "False",
+                "organic": "True",
+                "domestic": "True"
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123",
+                "@error": {
+                    "@message": "Invalid food item",
+                    "@messages": [
+                        "Food item name cannot be empty."
+                        "Food item category '666' does not exist."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit a food item that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/666",
+                "@error": {
+                    "@message": "Food item not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-items/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+
+### Delete food item [DELETE]
+
+Deletes the food item
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a food item that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/666",
+                "@error": {
+                    "@message": "Food item not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
+## Food Item Category Food Items Collection [/api/food-item-categories/{food_item_category_id}/food_items]
+
+A list of all food items known to the API listed under a category. Food items can also be added to the collection using POST.
+
++ Parameters
+
+    + food_item_category_id: 1 (number) - food item category's id
+
+    
+### List all category food items [GET]
+Get a list of all food items in the category
++ Relation: category-food-items
+
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+    
+
++ Response 200 (application/vnd.mason+json)
+    
+    + Body
+
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "name": "Protein",
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-item-categories/1/food-items"
+                    },
+                    "up": {
+                        "href": "/api/food-item-categories/1"
+                    },
+                    "clicook:food-item-categories-all": {
+                        "href": "/api/food-item-categories",
+                        "title": "All food item categories"
+                    },
+                    "clicook:add-category-food-item": {
+                        "href": "/api/food-item-categories/1/food-items",
+                        "title": "Add a new food item to the category",
+                        "encoding": "json",
+                        "method": "POST",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        }
+                    },
+                    "clicook:food-items-all": {
+                        "href": "/api/food-items"
+                    }
+                },
+                "items": [
+                    {
+                        "id": 123,
+                        "name": "Beef",
+                        "emissions_total": 1.22,
+                        "vegan": "False",
+                        "domestic": "True",
+                        "organic": "True",
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-item/123"
+                            }, 
+                            "profile": {
+                                "href": "/profiles/food-item/"
+                            }
+                        },
+                    },
+                    {
+                        "id": 1234,
+                        "food_item_category_id": 1,
+                        "name": "Chicken breast",
+                        "emissions_total": 0.88,
+                        "vegan": "False",
+                        "organic": "False",
+                        "domestic": "True",
+                        "@controls": {
+                            "self": {
+                                "href": "/api/food-items/1234"
+                            },
+                            "profile": {
+                                "href": "/profiles/food-items/"
+                            }
+                        }
+                    }
+                ]
+            }
+            
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a food item category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/666,
+                "@error": {
+                    "@message": "Food item category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
+### Add food item to category [POST]
+
+Adds a new food item to the food item category. The food item representation must be valid against the food item schema.
+
++ Relation: add-category-food-item
++ Request (application/json)
+
+    + Headers
+
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "name": "Turkey breast",
+                "food_item_category_id": 1.
+                "emission_per_kg": 0.96,
+                "vegan": "False",
+                "organic": "False",
+                "domestic": "False"
+            }
+
++ Response 201
+
+    + Headers
+    
+            Location: /api/food-items/124
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/1/food-items",
+                "@error": {
+                    "@message": "Invalid JSON document",
+                    "@messages": [                    
+                        "'name' is a required property"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add a food item to a food item category that does not exist
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-item-categories/666/food-items,
+                "@error": {
+                    "@message": "Food item category with id '666' not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+
++ Response 415 (application/vnd.mason+json)
+
+    The client did not use the proper content type, or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-item-categories/1/food-items",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+# Group FoodItemEquivalent
+
+Food item equivalent resource uses the [Food Item Equivalent Profile](reference/profiles/food-item-equivalent-profile). In error scenarios [Error Profile](reference/profiles/error-profile) is used.
+
+## Food Item Equivalent [/api/food-items/{food_item_id}/equivalents/{food_item_equivalent_id}]
+
+This resource represents a fooditem and the quantity of the fooditem in addition to the appropriate fooditem equivalent.
+
++ Parameters
+
+    + food_item_id: 123 (number) . food item's id
+    + food_item_equivalent_id: 1 (number) - equivalent's id
+    
+### Food item equivalent information [GET]
+
+Get the food item equivalents representation.
+
++ Relation: self
++ Request
+
+    + Headers
+    
+            Accept: application/vnd.mason+json
+        
++ Response 200 (application/vnd.mason+json)
+
+    + Body
+    
+            {
+                "@namespaces": {
+                    "clicook": {
+                        "name": "/climatecook/link-relations#"
+                    }
+                },
+                "id": "1",
+                "food_item_id": 123,
+                "unit_type" : "g",
+                "conversion_factor": 0.001
+                "@controls": {
+                    "self": {
+                        "href": "/api/food-items/123/equivalents/1"
+                    },        
+                    "edit": {
+                        "href": "/api/food-items/123/equivalents/1",
+                        "method": "PUT",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "food_item_id": {
+                                    "description": "Id of the food item",
+                                    "type": "integer"
+                                },
+                                "unit_type": {
+                                    "description": "Unit type of the equivalent",
+                                    "type": "integer"
+                                },
+                                "conversion_factor": {
+                                    "description": "Conversion factor of the equivalent",
+                                    "type": "float",
+                                }
+                            },
+                            "required": ["food_item_id", "unit_type", "conversion_factor"]
+                        }
+                    },
+                    "clicook:delete": {
+                        "method": "DELETE",
+                        "href": "/api/food-items/123/equivalents/1"
+                    },
+                    "up": {
+                        "href": "/api/recipes/123"
+                    },
+                    "clicook:food-item":{
+                        "href": "/api/food-items/1"
+                    },
+                    "clicook:food-item-equivalent":{
+                        "href": "/api/food-items/1/food-item-equivalents/1"
+                    },
+                    "clicook:food-items-with-equivalents":{
+                        "href": "/api/food-item-equivalents"
+                        "title": "All food items with their equivalents",
+                        "isHrefTemplate": true,
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "description": "Food item name for filtering results",
+                                    "type": "string",
+                                }
+                            },
+                            "required": []
+                        }
+                    }
+                    
+                }
+            }            
+
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to access a food item or a food item equivalent that does not exist.
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123/equivalents/666"
+                "@error": {
+                    "@message": "Food item equivalent not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
+### Edit food item equivalent information [PUT]
+
+Replace the food item equivalents representation with a new one. Must validate against the food item equivalent schema. 
+
++ Relation: edit
++ Request (application/json)
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
+    + Body
+    
+            {
+                "id": "1",
+                "food_item_id": 123,
+                "unit_type" : "l",
+                "conversion_factor": 1
+            }
+        
++ Response 204
+
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123/equivalents/1",
+                "@error": {
+                    "@message": "Invalid food item equivalent",
+                    "@messages": [
+                        "Food item '666' does not exist."
+                        "Conversion factor must be positive."
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to edit a food item or a food item equivalent that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123/equivalents/666",
+                "@error": {
+                    "@message": "Food item equivalent not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-items/123/equivalents/666",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
+            
+### Delete food item equivalent [DELETE]
+
+Deletes the food item equivalent.
+
++ Relation: delete
++ Request
+
+    + Headers
+        
+            Accept: application/vnd.mason+json
+        
++ Response 204
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to delete a food item equivalent that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123/equivalents/666",
+                "@error": {
+                    "@message": "Food item equivalent not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
