@@ -10,6 +10,7 @@ setup(
         "flask",
         "flask-restful",
         "flask-sqlalchemy",
+        "jsonschema",
         "SQLAlchemy",
     ]
 )

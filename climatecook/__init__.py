@@ -14,17 +14,17 @@ def create_app(test_config=None):
         SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "development.db"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
-    
+
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
-        
+
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    
+
     db.init_app(app)
 
     from . import models
@@ -34,4 +34,3 @@ def create_app(test_config=None):
     app.register_blueprint(api.api_bp)
 
     return app
-

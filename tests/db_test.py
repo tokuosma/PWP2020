@@ -8,7 +8,8 @@ from sqlalchemy import event
 from sqlalchemy.exc import IntegrityError
 
 from climatecook import create_app, db
-from climatecook.models import Rating, Recipe, RecipeCategory, Ingredient, FoodItem, FoodItemEquivalent, FoodItemCategory
+from climatecook.models import Rating, Recipe, RecipeCategory
+from climatecook.models import Ingredient, FoodItem, FoodItemEquivalent, FoodItemCategory
 
 
 @event.listens_for(Engine, "connect")
