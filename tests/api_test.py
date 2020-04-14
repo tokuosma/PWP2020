@@ -21,7 +21,7 @@ def client():
     app = create_app(config)
     with app.app_context():
         db.create_all()
-        _populate_db()  
+        _populate_db()
 
     yield app.test_client()
 
