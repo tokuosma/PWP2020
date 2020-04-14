@@ -118,6 +118,9 @@ class RecipeItem(Resource):
             if new_id != recipe.id and Recipe.query.filter_by(id=new_id).first() is not None:
                 return MasonBuilder.get_error_response(409, "Recipe id is already taken",
                     "Recipe id {0} is already taken".format(new_id))
+
+            if new_id < 0:
+                return MasonBuilder.get_error_response(400, "Recipe id must be a positive integer", "")
             recipe.id = new_id
 
         db.session.commit()
