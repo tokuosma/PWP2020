@@ -1035,6 +1035,25 @@ Replace the recipe's representation with a new one. Must validate against the re
                 }
             }
             
++ Response 409 (application/vnd.mason+json)
+
+    The client is trying to switch the id of an recipe to an one that is already taken.
+
+    + Body
+    
+            {
+                "resource_url": "/api/recipes/666",
+                "@error": {
+                    "@message": "Recipe id is already taken",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+            
 + Response 415 (application/vnd.mason+json)
 
     The client sent a request with the wrong content type or the request body was not valid JSON.
