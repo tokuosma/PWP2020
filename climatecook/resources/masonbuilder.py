@@ -77,6 +77,8 @@ class MasonBuilder(dict):
         : param str details: Longer human-readable description
         """
         error = MasonBuilder()
+        if details is None:
+            details = ""
         error.add_error(title=message, details=details)
         error.add_control("profile", "/api/profiles/")
         return Response(json.dumps(error), status, mimetype="application/vnd.mason+json")

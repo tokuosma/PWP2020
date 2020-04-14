@@ -1,7 +1,7 @@
 import json
 
 from flask import request, Response
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 
 from climatecook import db
 from climatecook.api import api, MASON
@@ -18,7 +18,15 @@ class RecipeCollection(Resource):
         body.add_control_add_recipe()
 
         items = []
-        recipes = Recipe.query.order_by(Recipe.name).all()
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str, help='Name of the recipe')
+        args = parser.parse_args()
+        if 'name' in args and args['name'] is not None:
+            name = args['name']
+            recipes = Recipe.query.filter(Recipe.name.startswith(name)).order_by(Recipe.name).all()
+        else:
+            recipes = Recipe.query.order_by(Recipe.name).all()
+
         for recipe in recipes:
             item = RecipeBuilder()
             item['name'] = recipe.name
@@ -31,7 +39,7 @@ class RecipeCollection(Resource):
 
     def post(self):
         if request.json is None:
-            return MasonBuilder.get_error_response(415, "Request content type must be JSON")
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
 
         keys = request.json.keys()
         if 'name' not in keys:
@@ -39,9 +47,9 @@ class RecipeCollection(Resource):
 
         name = request.json['name']
         if len(name) < 1:
-            return MasonBuilder.get_error_response(400, "Name is too short")
+            return MasonBuilder.get_error_response(400, "Name is too short", "")
         elif len(name) > 64:
-            return MasonBuilder.get_error_response(400, "Name is too long")
+            return MasonBuilder.get_error_response(400, "Name is too long", "")
 
         recipe = Recipe(
             name=name
