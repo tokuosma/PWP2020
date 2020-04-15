@@ -13,10 +13,14 @@ PROFILES = "https://climatecook.docs.apiary.io/#reference/profiles"
 # this import must be placed after we create api to avoid issues with
 # circular imports
 from climatecook.resources.recipes import RecipeCollection, RecipeItem
+from climatecook.resources.food_items import FoodItemCollection, FoodItemResource
 from climatecook.resources.masonbuilder import MasonBuilder
 
 api.add_resource(RecipeCollection, "/recipes/")
 api.add_resource(RecipeItem, "/recipes/<recipe_id>/")
+
+api.add_resource(FoodItemCollection, "/food-items/")
+api.add_resource(FoodItemResource, "/food-items/<food_item_id>/")
 
 
 @api_bp.route("/")
