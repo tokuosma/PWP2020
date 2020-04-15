@@ -2498,6 +2498,82 @@ Deletes the food item
                     }
                 }
             }
+            
+### Add food item equivalent [POST]
+
+Add new equivalent for food item.
+
++ Relation: add-food-item-equivalent
++ Request
+
+    + Headers
+    
+            Accept: application/json
+        
++ Response 201
+
+    + Headers
+    
+            Location: /api/food-items/123/food-item-equivalents/1
+
++ Response 400 (application/vnd.mason+json)
+
+    The client is trying to send a JSON document that doesn't validate against the schema.
+    
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/123",
+                "@error": {
+                    "@message": "Unit type is required",
+                    "@messages": []
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 404 (application/vnd.mason+json)
+
+    The client is trying to add equivalent to a food item that doesn't exist. 
+
+    + Body
+    
+            {
+                "resource_url": "/api/food-items/666",
+                "@error": {
+                    "@message": "Food item not found",
+                    "@messages": [null]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error/"
+                    }
+                }
+            }
+
++ Response 415 (application/vnd.mason+json)
+
+    The client sent a request with the wrong content type or the request body was not valid JSON.
+
+    + Body
+        
+            {
+                "resource_url": "/api/food-items/123",
+                "@error": {
+                    "@message": "Unsupported media type",
+                    "@messages": [
+                        "Use JSON"
+                    ]
+                },
+                "@controls": {
+                    "profile": {
+                        "href": "/profiles/error-profile/"
+                    }
+                }
+            }
 
 ## Food Item Category Food Items Collection [/api/food-item-categories/{food_item_category_id}/food_items]
 
