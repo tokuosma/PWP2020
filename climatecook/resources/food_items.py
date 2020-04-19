@@ -30,7 +30,7 @@ class FoodItemCollection(Resource):
         for food_item in food_items:
             item = FoodItemBuilder()
             item['name'] = food_item.name
-            item['emission_per_kg']
+            item['emission_per_kg'] = food_item.emission_per_kg
             item['vegan'] = food_item.vegan
             item['domestic'] = food_item.domestic
             item['organic'] = food_item.organic
@@ -45,13 +45,13 @@ class FoodItemCollection(Resource):
         if request.json is None:
             return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
 
-        required = FoodItemBuilder.schema()['required']
+        required = FoodItemBuilder.food_item_schema()['required']
 
         missing = []
 
-        for key in required.keys:
-            if key not in request.json.keys():
-                missing.append(key)
+        for field in required:
+            if field not in request.json.keys():
+                missing.append(field)
 
         if len(missing) > 0:
             details = []
@@ -75,15 +75,15 @@ class FoodItemCollection(Resource):
             return MasonBuilder.get_error_response(400, "emission_per_kg must be a positive number", "")
 
         vegan = False
-        if request.json['vegan'] is not None:
+        if 'vegan' in request.json.keys() and request.json['vegan'] is not None:
             vegan = request.json['vegan']
 
         organic = False
-        if request.json['organic'] is not None:
+        if 'organic' in request.json.keys() and request.json['organic'] is not None:
             organic = request.json['organic']
 
         domestic = False
-        if request.json['domestic'] is not None:
+        if 'domestic' in request.json.keys() and request.json['domestic'] is not None:
             domestic = request.json['domestic']
 
         food_item = FoodItem(
@@ -96,7 +96,7 @@ class FoodItemCollection(Resource):
         db.session.add(food_item)
         db.session.commit()
         headers = {
-            "Location": api.url_for(FoodItemResource, recipe_id=food_item.id)
+            "Location": api.url_for(FoodItemResource, food_item_id=food_item.id)
         }
         response = Response(status=201, headers=headers)
         return response

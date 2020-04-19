@@ -56,7 +56,7 @@ class Ingredient(db.Model):
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    food_item_category_id = db.Column(db.Integer, db.ForeignKey('food_item_category.id'), nullable=False)
+    food_item_category_id = db.Column(db.Integer, db.ForeignKey('food_item_category.id'), nullable=True)
     name = db.Column(db.String(128), nullable=False)
     emission_per_kg = db.Column(db.Float, nullable=False)
     vegan = db.Column(db.Boolean, nullable=False, default=0)

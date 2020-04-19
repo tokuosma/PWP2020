@@ -1,13 +1,14 @@
 import json
 import os
 import tempfile
+import random
 
 import pytest
 from jsonschema import validate
 
 
 from climatecook import create_app, db
-from climatecook.models import Recipe
+from climatecook.models import Recipe, FoodItem
 
 # based on http://flask.pocoo.org/docs/1.0/testing/
 # we don't need a client for database testing, just the db handle
@@ -37,6 +38,13 @@ def _populate_db():
             name="test-recipe-{}".format(i)
         )
         db.session.add(r)
+
+        i = FoodItem(
+            id=i,
+            name="test-food-item-{}".format(i),
+            emission_per_kg=float(i),
+        )
+        db.session.add(i)
     db.session.commit()
 
 
@@ -44,10 +52,18 @@ def _get_obj(obj_type):
     """
     Creates a valid JSON object of the desired type to be used for PUT and POST tests.
     """
+    i = random.randint(1, 10000)
     if(obj_type == "recipe"):
         return {
-            "id": 1,
+            "id": i,
             "name": "test-recipe"
+        }
+
+    if(obj_type == "food_item"):
+        return{
+            "id": i,
+            "name": "test-food-item-{}".format(i),
+            "emission_per_kg": float(i)
         }
 
 
@@ -117,7 +133,7 @@ def _check_control_put_method(ctrl, client, obj, obj_type):
     assert method == "put"
     assert encoding == "json"
     body = _get_obj(obj_type)
-    body["name"] = obj["name"]
+    body["id"] = obj["id"]
     validate(body, schema)
     resp = client.put(href, json=body)
     assert resp.status_code == 204
@@ -280,6 +296,7 @@ class TestRecipeItem(object):
         Tests the PUT method using a valid object.
         """
         valid = _get_obj("recipe")
+        valid["id"] = 1
         new_name = "new_name"
         valid["name"] = new_name
         # test with valid and see that it exists afterward
@@ -360,3 +377,93 @@ class TestRecipeItem(object):
         """
         resp = client.delete(self.INVALID_RESOURCE_URL)
         assert resp.status_code == 404
+
+
+class TestFoodItemCollection(object):
+
+    RESOURCE_URL = "/api/food-items/"
+
+    def test_get(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB popluation are present, and their controls.
+        """
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_post_method("clicook:add-food-item", client, body, "food_item")
+        assert len(body["items"]) == 3
+        for item in body["items"]:
+            assert "name" in item
+            _check_control_get_method("self", client, item)
+            _check_control_get_method_redirect("profile", client, item)
+
+    def test_get_name(self, client):
+        """
+        Test the GET method with additional query parameter 'name'.
+        The query should match one recipe in the test DB.
+        """
+        resp = client.get(self.RESOURCE_URL + "?name=test-recipe-1")
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_post_method("clicook:add-food-item", client, body, "food_item")
+        assert len(body["items"]) == 1
+        for item in body["items"]:
+            assert "name" in item
+            _check_control_get_method("self", client, item)
+            _check_control_get_method_redirect("profile", client, item)
+
+    def test_get_name_no_result(self, client):
+        """
+        Test the GET method with additional query parameter 'name'.
+        The query should match no recipe in the test DB.
+        """
+        resp = client.get(self.RESOURCE_URL + "?name=macaron")
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_post_method("clicook:add-food-item", client, body, "food_item")
+        assert len(body["items"]) == 0
+
+    def test_post_valid(self, client):
+        """
+        Tests the POST method using a valid object.
+        """
+        valid = _get_obj("recipe")
+
+        # test with valid and see that it exists afterward
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 201
+        resource_url = self.RESOURCE_URL + "4" + "/"
+        assert resp.headers["Location"].endswith(resource_url)
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["name"] == valid["name"]
+
+    def test_post_invalid_content_type(self, client):
+        """
+        Tests the POST method with invalid content type
+        """
+        valid = _get_obj("recipe")
+        resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
+        assert resp.status_code == 415
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_body(self, client):
+        """
+        Tests the POST method with invalid body
+        """
+        invalid = {"game": "kek"}
+        resp = client.post(self.RESOURCE_URL, json=invalid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
