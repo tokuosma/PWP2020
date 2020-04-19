@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 from climatecook import db
 from climatecook.api import api, MASON
 from climatecook.resources.masonbuilder import MasonBuilder
-from climatecook.models import Recipe
+from climatecook.models import Recipe, Ingredient, FoodItem, FoodItemEquivalent
 
 
 class RecipeCollection(Resource):
@@ -81,14 +81,33 @@ class RecipeItem(Resource):
         body.add_control("collection", api.url_for(RecipeCollection))
         body.add_control("profile", "/api/profiles/")
         # TODO: Add control for food-items with equivalents
+        # Is that really needed?
         body["name"] = recipe.name
         body["id"] = recipe.id
 
         items = []
-        # TODO: Add ingredients to items
-        body["items"] = items
-        # TODO: Add emission calculation once ingredients are implemented
+        # Added ingredients to items
         body["emissions_total"] = 0.0
+        ingredients = Ingredient.query.filter_by(recipe_id=recipe_id).all()
+        for ingredient in ingredients:
+            item = IngredientBuilder()
+            item["food_item_id"] = ingredient.food_item_id
+            item["food_item_equivalent_id"] = ingredient.food_item_equivalent_id
+            item["quantity"] = ingredient.quantity
+            item.add_control("self", api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient.id))
+            item.add_control("profile", "/api/profiles/")
+            items.append.item
+
+            # Added emission calculation while ingredients are implemented
+            # Can definitely be improved
+            food_item = FoodItem.query.filter_by(id=ingredient.food_item_id)
+            emission = food_item.emission_per_kg
+            quantity = ingredient.quantity
+            equivalent = FoodItemEquivalent.query.filter_by(id=ingredient.food_item_equivalent_id)
+            conversion = equivalent.conversion_factor
+            body["emissions_total"] += emission * conversion * quantity
+
+        body["items"] = items
 
         return Response(json.dumps(body), 200, mimetype=MASON)
 
@@ -141,6 +160,72 @@ class RecipeItem(Resource):
         return Response(None, 204)
 
 
+class IngredientItem(Resource):
+
+    def get(self, recipe_id, ingredient_id):
+        body = IngredientBuilder()
+        body.add_namespace("clicook", "/api/link-relations/")
+        ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
+
+        if ingredient is None:
+            return MasonBuilder.get_error_response(404, "Ingredient not found",
+            "Ingredient with id {0} not found".format(ingredient_id))
+
+        body.add_control("self", api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id))
+        body.add_control_edit_ingredient(recipe_id, ingredient_id)
+        body.add_control_delete_ingredient(recipe_id, ingredient_id)
+        body.add_control("profile", "/api/profiles/")
+
+        body["id"] = ingredient.id
+        body["recipe_id"] = ingredient.recipe_id
+        body["food_item_id"] = ingredient.food_item_id
+        body["food_item_equivalent_id"] = ingredient.food_item_equivalent_id
+        body["quantity"] = ingredient.quantity
+
+        return Response(json.dumps(body), 200, mimetype=MASON)
+
+    def put(self, recipe_id, ingredient_id):
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
+
+        ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
+
+        if ingredient is None:
+            return MasonBuilder.get_error_response(404, "Ingredient not found.",
+            "Ingredient with id {0} not found".format(ingredient_id))
+
+        keys = request.json.keys()
+        if not set(["recipe_id", "food_item_id", "food_item_equivalent_id", "quantity"]).issubset(keys):
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", "Missing fields")
+
+        new_id = request.json['id']
+        if new_id is not None:
+            if new_id != ingredient.id and Ingredient.query.filter_by(id=new_id).first() is not None:
+                return MasonBuilder.get_error_response(409, "Ingredient id is already taken",
+                    "Ingredient id {0} is already taken".format(new_id))
+
+            if new_id < 0:
+                return MasonBuilder.get_error_response(400, "Ingredient id must be a positive integer", "")
+            ingredient.id = new_id
+
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient.id)
+        }
+        response = Response(None, 204, headers=headers)
+        return response
+
+    def delete(self, ingredient_id):
+        ingredient = Ingredient.quert.filter_by(id=ingredient_id).first()
+        if ingredient is None:
+            return MasonBuilder.get_error_response(404, "Ingredient not found",
+            "Ingredient with id {0} not found".format(ingredient_id))
+
+        db.session.delete(ingredient)
+        db.session.commit()
+        return Response(None, 204)
+
+
 class RecipeBuilder(MasonBuilder):
 
     def add_control_add_recipe(self):
@@ -177,8 +262,8 @@ class RecipeBuilder(MasonBuilder):
             href=api.url_for(RecipeItem, recipe_id=recipe_id),
             method="POST",
             encoding="json",
-            title="Add a new recipe",
-            schema={}  # TODO: Add ingredient schema
+            title="Add a new ingredient",
+            schema=RecipeBuilder.ingredient_schema()  # Added ingredient schema
         )
 
     @staticmethod
@@ -194,3 +279,50 @@ class RecipeBuilder(MasonBuilder):
             "type": "string"
         }
         return schema
+
+    @staticmethod
+    def ingredient_schema():
+        schema = {
+            "type": "object",
+            "required": ["recipe_id", "food_item_id", "food_item_equivalent_id", "quantity"]
+        }
+        props = schema["properties"] = {}
+        props["recipe_id"] = {
+            "description": "Recipes ID",
+            "type": "number"
+        }
+        props["food_item_id"] = {
+            "description": "Food items ID",
+            "type": "number"
+        }
+        props["food_item_equivalent_id"] = {
+            "description": "Equivalents ID",
+            "type": "number"
+        }
+        props["quantity"] = {
+            "description": "Amount of food item",
+            "type": "number"
+        }
+
+
+class IngredientBuilder(MasonBuilder):
+
+    def add_control_edit_ingredient(self, recipe_id, ingredient_id):
+        self.add_control(
+            "edit",
+            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
+            method="PUT",
+            encoding="json",
+            title="Edit an ingredient",
+            schema=RecipeBuilder.ingredient_schema()
+        )
+
+    def add_control_delete_ingredient(self, recipe_id, ingredient_id):
+        self.add_control(
+            "clicook:delete",
+            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
+            method="DELETE",
+            encoding="json",
+            title="Delete an ingredient",
+            schema=RecipeBuilder.ingredient_schema()
+        )

@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 from climatecook import db
 from climatecook.api import api, MASON
 from climatecook.resources.masonbuilder import MasonBuilder
-from climatecook.models import FoodItem
+from climatecook.models import FoodItem, FoodItemEquivalent
 
 
 class FoodItemCollection(Resource):
@@ -130,6 +130,8 @@ class FoodItemResource(Resource):
         body['organic'] = food_item.organic
 
         # TODO: Should food item equivalents be added to items?
+        # Probably not, equivalents don't really have a purpose
+        # from a client perspective
         # body["items"] = items
         return Response(json.dumps(body), 200, mimetype=MASON)
 
@@ -210,6 +212,90 @@ class FoodItemResource(Resource):
         return Response(None, 204)
 
 
+class FoodItemEquivalentCollection(Resource):
+
+    def get(self):
+        # TODO: Get food item - equivalent pairs
+        pass
+
+
+class FoodItemEquivalentResource(Resource):
+    def get(self, food_item_id, food_item_equivalent_id):
+        body = FoodItemEquivalentBuilder()
+        body.add_namespace("clicook", "/api/link-relations")
+        food_item_equivalent = FoodItemEquivalent.query.filter_by(id=food_item_equivalent_id).first()
+
+        if food_item_equivalent is None:
+            return MasonBuilder.get_error_response(404, "Equivalent not found",
+            "FoodItemEquivalent with id {0} not found".format(food_item_equivalent_id))
+
+        body.add_control("self", api.url_for(FoodItemEquivalentResource, food_item_id=food_item_id,
+        food_item_equivalent_id=food_item_equivalent_id))
+        body.add_control_edit_food_item_equivalent(food_item_id, food_item_equivalent_id)
+        body.add_control_delete_food_item_equivalent(food_item_id, food_item_equivalent_id)
+        body.add_control("profile", "/api/profiles/")
+
+        body["id"] = food_item_equivalent.id
+        body["food_item_id"] = food_item_equivalent.food_item_id
+        body["unit_type"] = food_item_equivalent.unit_type
+        body["conversion_factor"] = food_item_equivalent.conversion_factor
+
+        return Response(json.dumps(body), 200, mimetype=MASON)
+
+    def put(self, food_item_equivalent_id):
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
+
+        food_item_equivalent = FoodItemEquivalent.query.filter_by(id=food_item_equivalent_id).first()
+
+        if food_item_equivalent is None:
+            return MasonBuilder.get_error_response(404, "Food item equivalent not found.",
+            "FoodItemEquivalent with id {0} not found".format(food_item_equivalent_id))
+
+        keys = request.json.keys()
+        if not set(["food_item_id", "unit_type", "conversion_factor"]).issubset(keys):
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields")
+
+        conversion_factor = 0
+        try:
+            conversion_factor = float(request.json['conversion_factor'])
+            if conversion_factor < 0:
+                raise ValueError
+        except ValueError:
+            return MasonBuilder.get_error_response(400, "Conversion factor must be a positive number", "")
+        food_item_equivalent.conversion_factor = conversion_factor
+
+        if "id" in keys:
+            try:
+                new_id = int(request.json['id'])
+                if new_id is not None:
+                    if new_id != food_item_equivalent.id and FoodItemEquivalent.query.filter_by(id=new_id).first() is not None:
+                        return MasonBuilder.get_error_response(409, "FoodItemEquivalent id is already taken",
+                            "FoodItemEquivalent id {0} is already taken".format(new_id))
+
+                    if new_id < 0:
+                        return MasonBuilder.get_error_response(400, "FoodItemEquivalent id must be a positive integer", "")
+                    food_item_equivalent.id = new_id
+            except ValueError:
+                return MasonBuilder.get_error_response(400, "FoodItemEquivalent id must be a positive integer", "")
+
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(FoodItemEquivalentResource, food_item_equivalent_id=food_item_equivalent.id)
+        }
+        response = Response(None, 204, headers=headers)
+        return response
+
+    def delete(self, food_item_equivalent_id):
+        food_item_equivalent = FoodItemEquivalent.query.filter_by(id=food_item_equivalent_id).first()
+        if food_item_equivalent is None:
+            return MasonBuilder.get_error_response(404, "FoodItemEquivalent not found.",
+            "FoodItemEquivalent with id {0} not found".format(food_item_equivalent_id))
+        db.session.delete(food_item_equivalent)
+        db.session.commit()
+        return Response(None, 204)
+
+
 class FoodItemBuilder(MasonBuilder):
 
     def add_control_add_food_item(self):
@@ -247,7 +333,7 @@ class FoodItemBuilder(MasonBuilder):
             method="POST",
             encoding="json",
             title="Add a new food item equivalent",
-            schema={}  # TODO: Add food item equivalent schema
+            schema=FoodItemBuilder.food_item_equivalent_schema  # Added food item equivalent schema
         )
 
     @staticmethod
@@ -279,3 +365,46 @@ class FoodItemBuilder(MasonBuilder):
             "type": "boolean"
         }
         return schema
+
+    @staticmethod
+    def food_item_equivalent_schema():
+        schema = {
+            "type": "object",
+            "required": ["food_item_id", "unit_type", "conversion_factor"]
+        }
+        props = schema["properties"] = {}
+        props["food_item_id"] = {
+            "description": "Food items ID",
+            "type": "number"
+        }
+        props["unit_type"] = {
+            "description": "Enumerable unit type",
+            "type": "number"
+        }
+        props["conversion_factor"] = {
+            "description": "Translates unit to kg",
+            "type": "number"
+        }
+
+
+class FoodItemEquivalentBuilder(MasonBuilder):
+    def add_control_edit_food_item_equivalent(self, food_item_id, food_item_equivalent_id):
+        self.add_control(
+            "edit",
+            href=api.url_for(FoodItemEquivalentResource, food_item_id=food_item_id,
+            food_item_equivalent_id=food_item_equivalent_id),
+            method="PUT",
+            encoding="json",
+            title="Edit an existing equivalent",
+            schema=FoodItemBuilder.food_item_equivalent_schema()
+        )
+
+    def add_control_delete_food_item_equivalent(self, food_item_id, food_item_equivalent_id):
+        self.add_control(
+            "clicook:delete",
+            href=api.url_for(FoodItemEquivalentResource, food_item_id=food_item_id,
+            food_item_equivalent_id=food_item_equivalent_id),
+            method="DELETE",
+            encoding="json",
+            title="Delete an existing equivalent",
+        )
