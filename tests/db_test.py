@@ -8,8 +8,10 @@ from sqlalchemy import event
 from sqlalchemy.exc import IntegrityError
 
 from climatecook import create_app, db
-from climatecook.models import Rating, Recipe, RecipeCategory
-from climatecook.models import Ingredient, FoodItem, FoodItemEquivalent, FoodItemCategory
+from climatecook.models import Recipe
+# from climatecook.models import Rating, RecipeCategory
+from climatecook.models import Ingredient, FoodItem, FoodItemEquivalent
+# from climatecook.models import FoodItemCategory
 
 
 @event.listens_for(Engine, "connect")
@@ -52,47 +54,47 @@ def test_recipe_create(app_handle):
         assert Recipe.query.count() == 1
 
 
-def test_recipe_create_with_category(app_handle):
-    """
-    Create recipe with category
-    """
-    recipe_id = random.randint(1, 10000000)
-    recipe_category_id = random.randint(1, 10000000)
+# def test_recipe_create_with_category(app_handle):
+#     """
+#     Create recipe with category
+#     """
+#     recipe_id = random.randint(1, 10000000)
+#     recipe_category_id = random.randint(1, 10000000)
 
-    recipe_category = RecipeCategory(
-        id=recipe_category_id,
-        name="donkeyfood"
-    )
+#     recipe_category = RecipeCategory(
+#         id=recipe_category_id,
+#         name="donkeyfood"
+#     )
 
-    recipe = Recipe(
-        id=recipe_id,
-        name="donkey-recipe",
-        recipe_category_id=recipe_category.id
-    )
+#     recipe = Recipe(
+#         id=recipe_id,
+#         name="donkey-recipe",
+#         recipe_category_id=recipe_category.id
+#     )
 
-    with app_handle.app_context():
-        db.session.add(recipe_category)
-        db.session.add(recipe)
-        db.session.commit()
-        recipe = Recipe.query.filter_by(id=recipe_id).first()
-        recipe_category = RecipeCategory.query.filter_by(id=recipe_category_id).first()
-        assert recipe.recipe_category.id == recipe_category_id
-        assert recipe_category.recipes[0].id == recipe.id
+#     with app_handle.app_context():
+#         db.session.add(recipe_category)
+#         db.session.add(recipe)
+#         db.session.commit()
+#         recipe = Recipe.query.filter_by(id=recipe_id).first()
+#         recipe_category = RecipeCategory.query.filter_by(id=recipe_category_id).first()
+#         assert recipe.recipe_category.id == recipe_category_id
+#         assert recipe_category.recipes[0].id == recipe.id
 
 
-def test_recipe_create_with_invalid_category(app_handle):
-    """
-    Try adding a recipe with a non-existing category
-    """
-    fake_id = random.randint(1, 10000000)
-    recipe = Recipe(
-        name="donkey-recipe",
-        recipe_category_id=fake_id
-    )
-    with app_handle.app_context():
-        db.session.add(recipe)
-        with pytest.raises(IntegrityError):
-            db.session.commit()
+# def test_recipe_create_with_invalid_category(app_handle):
+#     """
+#     Try adding a recipe with a non-existing category
+#     """
+#     fake_id = random.randint(1, 10000000)
+#     recipe = Recipe(
+#         name="donkey-recipe",
+#         recipe_category_id=fake_id
+#     )
+#     with app_handle.app_context():
+#         db.session.add(recipe)
+#         with pytest.raises(IntegrityError):
+#             db.session.commit()
 
 
 def test_recipe_create_with_invalid_name(app_handle):
@@ -108,87 +110,87 @@ def test_recipe_create_with_invalid_name(app_handle):
             db.session.commit()
 
 
-def test_recipe_category_create(app_handle):
-    """
-    Add valid recipe category
-    """
-    recipe_category = RecipeCategory(
-        name="donkeyfood"
-    )
-    with app_handle.app_context():
-        db.session.add(recipe_category)
-        db.session.commit()
-        assert RecipeCategory.query.count() == 1
+# def test_recipe_category_create(app_handle):
+#     """
+#     Add valid recipe category
+#     """
+#     recipe_category = RecipeCategory(
+#         name="donkeyfood"
+#     )
+#     with app_handle.app_context():
+#         db.session.add(recipe_category)
+#         db.session.commit()
+#         assert RecipeCategory.query.count() == 1
 
 
-def test_rating_create(app_handle):
-    """
-    Add valid rating
-    """
-    recipe_id = random.randint(1, 10000000)
-    rating_id = random.randint(1, 10000000)
-    recipe = Recipe(
-        id=recipe_id,
-        name="donkey_recipe"
-    )
-    rating = Rating(
-        id=rating_id,
-        recipe_id=recipe_id,
-        rating=5,
-        comment="this is donkeyfood!"
-    )
+# def test_rating_create(app_handle):
+#     """
+#     Add valid rating
+#     """
+#     recipe_id = random.randint(1, 10000000)
+#     rating_id = random.randint(1, 10000000)
+#     recipe = Recipe(
+#         id=recipe_id,
+#         name="donkey_recipe"
+#     )
+#     rating = Rating(
+#         id=rating_id,
+#         recipe_id=recipe_id,
+#         rating=5,
+#         comment="this is donkeyfood!"
+#     )
 
-    with app_handle.app_context():
-        db.session.add(recipe)
-        db.session.add(rating)
-        db.session.commit()
-        assert Rating.query.count() == 1
-        rating = Rating.query.filter_by(id=rating_id).first()
-        assert rating.recipe.id == recipe_id
-
-
-def test_rating_create_invalid_recipe(app_handle):
-    """
-    Try to add rating with invalid recipe id
-    """
-    recipe_id = random.randint(1, 10000000)
-    rating_id = random.randint(1, 10000000)
-
-    rating = Rating(
-        id=rating_id,
-        recipe_id=recipe_id,
-        rating=5,
-        comment="this is donkeyfood!"
-    )
-
-    with app_handle.app_context():
-        db.session.add(rating)
-        with pytest.raises(IntegrityError):
-            db.session.commit()
+#     with app_handle.app_context():
+#         db.session.add(recipe)
+#         db.session.add(rating)
+#         db.session.commit()
+#         assert Rating.query.count() == 1
+#         rating = Rating.query.filter_by(id=rating_id).first()
+#         assert rating.recipe.id == recipe_id
 
 
-def test_rating_create_with_invalid_rating(app_handle):
-    """
-    Try to add rating with invalid rating
-    """
-    recipe_id = random.randint(1, 10000000)
-    rating_id = random.randint(1, 10000000)
-    recipe = Recipe(
-        id=recipe_id,
-        name="donkey_recipe"
-    )
-    rating = Rating(
-        id=rating_id,
-        recipe_id=recipe_id,
-        rating=0,
-        comment="this is donkeyfood!"
-    )
+# def test_rating_create_invalid_recipe(app_handle):
+#     """
+#     Try to add rating with invalid recipe id
+#     """
+#     recipe_id = random.randint(1, 10000000)
+#     rating_id = random.randint(1, 10000000)
 
-    with app_handle.app_context():
-        db.session.add(recipe)
-        db.session.add(rating)
-        with pytest.raises(IntegrityError):
-            db.session.commit()
+#     rating = Rating(
+#         id=rating_id,
+#         recipe_id=recipe_id,
+#         rating=5,
+#         comment="this is donkeyfood!"
+#     )
+
+#     with app_handle.app_context():
+#         db.session.add(rating)
+#         with pytest.raises(IntegrityError):
+#             db.session.commit()
+
+
+# def test_rating_create_with_invalid_rating(app_handle):
+#     """
+#     Try to add rating with invalid rating
+#     """
+#     recipe_id = random.randint(1, 10000000)
+#     rating_id = random.randint(1, 10000000)
+#     recipe = Recipe(
+#         id=recipe_id,
+#         name="donkey_recipe"
+#     )
+#     rating = Rating(
+#         id=rating_id,
+#         recipe_id=recipe_id,
+#         rating=0,
+#         comment="this is donkeyfood!"
+#     )
+
+#     with app_handle.app_context():
+#         db.session.add(recipe)
+#         db.session.add(rating)
+#         with pytest.raises(IntegrityError):
+#             db.session.commit()
 
 
 def test_ingredient_create(app_handle):
@@ -199,7 +201,7 @@ def test_ingredient_create(app_handle):
     ingredient_id = random.randint(1, 10000000)
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     recipe = Recipe(
         id=recipe_id,
         name="donkey_recipe"
@@ -213,7 +215,7 @@ def test_ingredient_create(app_handle):
     )
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -223,16 +225,16 @@ def test_ingredient_create(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(recipe)
         db.session.add(ingredient)
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         db.session.commit()
         assert Ingredient.query.count() == 1
         ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
@@ -249,7 +251,7 @@ def test_ingredient_create_with_invalid_recipe(app_handle):
     ingredient_id = random.randint(1, 10000000)
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     ingredient = Ingredient(
         id=ingredient_id,
         recipe_id=recipe_id,
@@ -259,7 +261,7 @@ def test_ingredient_create_with_invalid_recipe(app_handle):
     )
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -269,15 +271,15 @@ def test_ingredient_create_with_invalid_recipe(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(ingredient)
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -290,7 +292,7 @@ def test_ingredient_create_with_invalid_fooditem(app_handle):
     ingredient_id = random.randint(1, 10000000)
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     recipe = Recipe(
         id=recipe_id,
         name="donkey_recipe"
@@ -308,15 +310,15 @@ def test_ingredient_create_with_invalid_fooditem(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(recipe)
         db.session.add(ingredient)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -329,7 +331,7 @@ def test_ingredient_create_with_invalid_fooditemequivalent(app_handle):
     ingredient_id = random.randint(1, 10000000)
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     recipe = Recipe(
         id=recipe_id,
         name="donkey_recipe"
@@ -343,19 +345,19 @@ def test_ingredient_create_with_invalid_fooditemequivalent(app_handle):
     )
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(recipe)
         db.session.add(ingredient)
         db.session.add(fooditem)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -368,7 +370,7 @@ def test_ingredient_create_with_invalid_quantity(app_handle):
     ingredient_id = random.randint(1, 10000000)
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     recipe = Recipe(
         id=recipe_id,
         name="donkey_recipe"
@@ -382,7 +384,7 @@ def test_ingredient_create_with_invalid_quantity(app_handle):
     )
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -392,16 +394,16 @@ def test_ingredient_create_with_invalid_quantity(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(recipe)
         db.session.add(ingredient)
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -411,42 +413,42 @@ def test_fooditem_create(app_handle):
     Add valid fooditem
     """
     food_item_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         db.session.commit()
         assert FoodItem.query.count() == 1
         fooditem = FoodItem.query.filter_by(id=food_item_id).first()
-        assert fooditem.food_item_category.id == food_item_category_id
+        # assert fooditem.food_item_category.id == food_item_category_id
 
 
-def test_fooditem_create_with_invalid_fooditemcategory(app_handle):
-    """
-    Try to add fooditem with invalid fooditemcategory id
-    """
-    food_item_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
-    fooditem = FoodItem(
-        id=food_item_id,
-        food_item_category_id=food_item_category_id,
-        name="donkey_salt",
-        emission_per_kg=100.0
-    )
-    with app_handle.app_context():
-        db.session.add(fooditem)
-        with pytest.raises(IntegrityError):
-            db.session.commit()
+# def test_fooditem_create_with_invalid_fooditemcategory(app_handle):
+#     """
+#     Try to add fooditem with invalid fooditemcategory id
+#     """
+#     food_item_id = random.randint(1, 10000000)
+#     food_item_category_id = random.randint(1, 10000000)
+#     fooditem = FoodItem(
+#         id=food_item_id,
+#         food_item_category_id=food_item_category_id,
+#         name="donkey_salt",
+#         emission_per_kg=100.0
+#     )
+#     with app_handle.app_context():
+#         db.session.add(fooditem)
+#         with pytest.raises(IntegrityError):
+#             db.session.commit()
 
 
 def test_fooditem_create_with_invalid_name(app_handle):
@@ -454,20 +456,20 @@ def test_fooditem_create_with_invalid_name(app_handle):
     Try to add fooditem with empty name
     """
     food_item_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="",
         emission_per_kg=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -477,20 +479,20 @@ def test_fooditem_create_with_invalid_emission(app_handle):
     Try to add fooditem with negative emission per kg
     """
     food_item_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=-100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -501,10 +503,10 @@ def test_fooditemequivalent_create(app_handle):
     """
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -514,14 +516,14 @@ def test_fooditemequivalent_create(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         db.session.commit()
         assert FoodItem.query.count() == 1
         fooditem = FoodItem.query.filter_by(id=food_item_id).first()
@@ -552,10 +554,10 @@ def test_fooditemequivalent_create_with_invalid_unit(app_handle):
     """
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -565,14 +567,14 @@ def test_fooditemequivalent_create_with_invalid_unit(app_handle):
         unit_type=-10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -584,10 +586,10 @@ def test_fooditemequivalent_create_with_duplicate_unittype(app_handle):
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id_1 = random.randint(1, 10000000)
     food_item_equivalent_id_2 = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -603,15 +605,15 @@ def test_fooditemequivalent_create_with_duplicate_unittype(app_handle):
         unit_type=10,
         conversion_factor=100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
         db.session.add(fooditemequivalent_1)
         db.session.add(fooditemequivalent_2)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
@@ -622,10 +624,10 @@ def test_fooditemequivalent_create_with_invalid_conversion(app_handle):
     """
     food_item_id = random.randint(1, 10000000)
     food_item_equivalent_id = random.randint(1, 10000000)
-    food_item_category_id = random.randint(1, 10000000)
+    # food_item_category_id = random.randint(1, 10000000)
     fooditem = FoodItem(
         id=food_item_id,
-        food_item_category_id=food_item_category_id,
+        # food_item_category_id=food_item_category_id,
         name="donkey_salt",
         emission_per_kg=100.0
     )
@@ -635,43 +637,43 @@ def test_fooditemequivalent_create_with_invalid_conversion(app_handle):
         unit_type=10,
         conversion_factor=-100.0
     )
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
+    # fooditemcategory = FoodItemCategory(
+    #     id=food_item_category_id,
+    #     name="donkey"
+    # )
     with app_handle.app_context():
         db.session.add(fooditem)
         db.session.add(fooditemequivalent)
-        db.session.add(fooditemcategory)
+        # db.session.add(fooditemcategory)
         with pytest.raises(IntegrityError):
             db.session.commit()
 
 
-def test_fooditemcategory_create(app_handle):
-    """
-    Add valid fooditemcategory
-    """
-    food_item_category_id = random.randint(1, 10000000)
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name="donkey"
-    )
-    with app_handle.app_context():
-        db.session.add(fooditemcategory)
-        db.session.commit()
-        assert FoodItemCategory.query.count() == 1
+# def test_fooditemcategory_create(app_handle):
+#     """
+#     Add valid fooditemcategory
+#     """
+#     food_item_category_id = random.randint(1, 10000000)
+#     fooditemcategory = FoodItemCategory(
+#         id=food_item_category_id,
+#         name="donkey"
+#     )
+#     with app_handle.app_context():
+#         db.session.add(fooditemcategory)
+#         db.session.commit()
+#         assert FoodItemCategory.query.count() == 1
 
 
-def test_fooditemcategory_create_with_invalid_name(app_handle):
-    """
-    Try to add fooditemcategory with invalid empty name
-    """
-    food_item_category_id = random.randint(1, 10000000)
-    fooditemcategory = FoodItemCategory(
-        id=food_item_category_id,
-        name=""
-    )
-    with app_handle.app_context():
-        db.session.add(fooditemcategory)
-        with pytest.raises(IntegrityError):
-            db.session.commit()
+# def test_fooditemcategory_create_with_invalid_name(app_handle):
+#     """
+#     Try to add fooditemcategory with invalid empty name
+#     """
+#     food_item_category_id = random.randint(1, 10000000)
+#     fooditemcategory = FoodItemCategory(
+#         id=food_item_category_id,
+#         name=""
+#     )
+#     with app_handle.app_context():
+#         db.session.add(fooditemcategory)
+#         with pytest.raises(IntegrityError):
+#             db.session.commit()

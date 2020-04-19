@@ -74,7 +74,7 @@ class RecipeItem(Resource):
             return MasonBuilder.get_error_response(404, "Recipe not found.",
             "Recipe with id {0} not found".format(recipe_id))
 
-        body.add_control("self", api.url_for(RecipeCollection), recipe_id=recipe.id)
+        body.add_control("self", api.url_for(RecipeItem, recipe_id=recipe.id))
         body.add_control_edit_recipe(recipe.id)
         body.add_control_delete_recipe(recipe.id)
         body.add_control_add_ingredient(recipe.id)

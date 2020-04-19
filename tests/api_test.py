@@ -407,7 +407,7 @@ class TestFoodItemCollection(object):
         Test the GET method with additional query parameter 'name'.
         The query should match one recipe in the test DB.
         """
-        resp = client.get(self.RESOURCE_URL + "?name=test-recipe-1")
+        resp = client.get(self.RESOURCE_URL + "?name=test-food-item-1")
         assert resp.status_code == 200
         body = json.loads(resp.data)
         _check_namespace(client, body)
@@ -436,7 +436,7 @@ class TestFoodItemCollection(object):
         """
         Tests the POST method using a valid object.
         """
-        valid = _get_obj("recipe")
+        valid = _get_obj("food_item")
 
         # test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)

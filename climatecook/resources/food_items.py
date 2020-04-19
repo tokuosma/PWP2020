@@ -34,7 +34,9 @@ class FoodItemCollection(Resource):
             item['vegan'] = food_item.vegan
             item['domestic'] = food_item.domestic
             item['organic'] = food_item.organic
+            print(food_item.id)
             item.add_control("self", api.url_for(FoodItemResource, food_item_id=food_item.id))
+            print(item['@controls']['self'])
             item.add_control("profile", "/api/profiles/")
             items.append(item)
 
@@ -105,16 +107,107 @@ class FoodItemCollection(Resource):
 class FoodItemResource(Resource):
 
     def get(self, food_item_id):
-        raise NotImplementedError
+        body = FoodItemBuilder()
+        body.add_namespace("clicook", "/api/link-relations/")
+        food_item = FoodItem.query.filter_by(id=food_item_id).first()
+
+        if food_item is None:
+            return MasonBuilder.get_error_response(404, "Food item not found.",
+            "FoodItem with id {0} not found".format(food_item_id))
+
+        body.add_control("self", api.url_for(FoodItemResource, food_item_id=food_item.id))
+        body.add_control_edit_food_item(food_item.id)
+        body.add_control_delete_food_item(food_item.id)
+        body.add_control_add_food_item_equivalent(food_item.id)
+        body.add_control("collection", api.url_for(FoodItemCollection))
+        body.add_control("profile", "/api/profiles/")
+        # TODO: Add control for food-items with equivalents
+        body["id"] = food_item.id
+        body['name'] = food_item.name
+        body['emission_per_kg'] = food_item.emission_per_kg
+        body['vegan'] = food_item.vegan
+        body['domestic'] = food_item.domestic
+        body['organic'] = food_item.organic
+
+        # TODO: Should food item equivalents be added to items?
+        # body["items"] = items
+        return Response(json.dumps(body), 200, mimetype=MASON)
 
     def post(self, food_item_id):
         raise NotImplementedError
 
     def put(self, food_item_id):
-        raise NotImplementedError
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
+
+        food_item = FoodItem.query.filter_by(id=food_item_id).first()
+
+        if food_item is None:
+            return MasonBuilder.get_error_response(404, "Food item not found.",
+            "FoodItem with id {0} not found".format(food_item_id))
+
+        keys = request.json.keys()
+        if 'name' not in keys:
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", ["Missing field:name"])
+        if 'emission_per_kg' not in keys:
+            return MasonBuilder.get_error_response(400,
+                "Incomplete request - missing fields",
+                ["Missing field:emission_per_kg"])
+
+        name = request.json['name']
+        if len(name) < 1:
+            return MasonBuilder.get_error_response(400, "Name is too short", "")
+        elif len(name) > 128:
+            return MasonBuilder.get_error_response(400, "Name is too long", "")
+        food_item.name = name
+
+        emissions = 0
+        try:
+            emissions = float(request.json['emission_per_kg'])
+            if emissions < 0:
+                raise ValueError
+        except ValueError:
+            return MasonBuilder.get_error_response(400, "Emissions per kg must be a positive number", "")
+        food_item.emission_per_kg = emissions
+
+        if "id" in keys:
+            try:
+                new_id = int(request.json['id'])
+                if new_id is not None:
+                    if new_id != food_item.id and FoodItem.query.filter_by(id=new_id).first() is not None:
+                        return MasonBuilder.get_error_response(409, "FoodItem id is already taken",
+                            "FoodItem id {0} is already taken".format(new_id))
+
+                    if new_id < 0:
+                        return MasonBuilder.get_error_response(400, "FoodItem id must be a positive integer", "")
+                    food_item.id = new_id
+            except ValueError:
+                return MasonBuilder.get_error_response(400, "FoodItem id must be a positive integer", "")
+
+        if 'vegan' in request.json.keys() and type(request.json['vegan']) is bool:
+            food_item.vegan = request.json['vegan']
+
+        if 'organic' in request.json.keys() and type(request.json['organic']) is bool:
+            food_item.organic = request.json['organic']
+
+        if 'domestic' in request.json.keys() and type(request.json['domestic']) is bool:
+            food_item.domestic = request.json['domestic']
+
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(FoodItemResource, food_item_id=food_item.id)
+        }
+        response = Response(None, 204, headers=headers)
+        return response
 
     def delete(self, food_item_id):
-        raise NotImplementedError
+        food_item = FoodItem.query.filter_by(id=food_item_id).first()
+        if food_item is None:
+            return MasonBuilder.get_error_response(404, "FoodItem not found.",
+            "FoodItem with id {0} not found".format(food_item_id))
+        db.session.delete(food_item)
+        db.session.commit()
+        return Response(None, 204)
 
 
 class FoodItemBuilder(MasonBuilder):

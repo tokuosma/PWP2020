@@ -12,32 +12,32 @@ def init_db_command():
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    recipe_category_id = db.Column(db.Integer, db.ForeignKey('recipe_category.id', ondelete="SET NULL"), nullable=True)
+    # recipe_category_id = db.Column(db.Integer, db.ForeignKey('recipe_category.id', ondelete="SET NULL"), nullable=True)
     name = db.Column(db.String(64), nullable=False)
 
-    recipe_category = db.relationship("RecipeCategory", back_populates="recipes")
-    ratings = db.relationship("Rating", back_populates="recipe", cascade="all,delete")
+    # recipe_category = db.relationship("RecipeCategory", back_populates="recipes")
+    # ratings = db.relationship("Rating", back_populates="recipe", cascade="all,delete")
     ingredients = db.relationship("Ingredient", back_populates="recipe", cascade="all,delete")
 
     __table_args__ = (CheckConstraint('length(name) >= 1', name='cc_recipe_name'),)
 
 
-class RecipeCategory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False)
+# class RecipeCategory(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(64), nullable=False)
 
-    recipes = db.relationship("Recipe", back_populates="recipe_category")
+#     recipes = db.relationship("Recipe", back_populates="recipe_category")
 
 
-class Rating(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.String(2048), nullable=False)
+# class Rating(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"), nullable=False)
+#     rating = db.Column(db.Integer, nullable=False)
+#     comment = db.Column(db.String(2048), nullable=False)
 
-    recipe = db.relationship("Recipe", back_populates="ratings")
+#     recipe = db.relationship("Recipe", back_populates="ratings")
 
-    __table_args__ = (CheckConstraint('rating >= 1 AND rating <= 5', name='cc_rating_rating'),)
+#     __table_args__ = (CheckConstraint('rating >= 1 AND rating <= 5', name='cc_rating_rating'),)
 
 
 class Ingredient(db.Model):
@@ -56,14 +56,14 @@ class Ingredient(db.Model):
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    food_item_category_id = db.Column(db.Integer, db.ForeignKey('food_item_category.id'), nullable=True)
+    # food_item_category_id = db.Column(db.Integer, db.ForeignKey('food_item_category.id'), nullable=True)
     name = db.Column(db.String(128), nullable=False)
     emission_per_kg = db.Column(db.Float, nullable=False)
     vegan = db.Column(db.Boolean, nullable=False, default=0)
     organic = db.Column(db.Boolean, nullable=False, default=0)
     domestic = db.Column(db.Boolean, nullable=False, default=0)
 
-    food_item_category = db.relationship("FoodItemCategory", back_populates="food_items")
+    # food_item_category = db.relationship("FoodItemCategory", back_populates="food_items")
     food_item_equivalents = db.relationship("FoodItemEquivalent", back_populates="food_item", cascade="all,delete")
 
     __table_args__ = (
@@ -87,12 +87,12 @@ class FoodItemEquivalent(db.Model):
     )
 
 
-class FoodItemCategory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False)
+# class FoodItemCategory(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(64), nullable=False)
 
-    food_items = db.relationship("FoodItem", back_populates="food_item_category")
+#     food_items = db.relationship("FoodItem", back_populates="food_item_category")
 
-    __table_args__ = (
-        CheckConstraint('length(name) >= 1', name='cc_food_item_category_name'),
-    )
+#     __table_args__ = (
+#         CheckConstraint('length(name) >= 1', name='cc_food_item_category_name'),
+#     )
