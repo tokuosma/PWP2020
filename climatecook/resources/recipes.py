@@ -84,7 +84,6 @@ class RecipeItem(Resource):
         body["id"] = recipe.id
 
         items = []
-        # Added ingredients to items
         body["emissions_total"] = 0.0
         ingredients = Ingredient.query.filter_by(recipe_id=recipe_id).all()
         for ingredient in ingredients:
@@ -92,18 +91,12 @@ class RecipeItem(Resource):
             item["food_item_id"] = ingredient.food_item_id
             item["food_item_equivalent_id"] = ingredient.food_item_equivalent_id
             item["quantity"] = ingredient.quantity
+            body["emissions_total"] += ingredient.food_item.emission_per_kg \
+                * ingredient.quantity \
+                * ingredient.food_item_equivalent.conversion_factor
             item.add_control("self", api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient.id))
             item.add_control("profile", "/api/profiles/")
-            items.append.item
-
-            # Added emission calculation while ingredients are implemented
-            # Can definitely be improved
-            food_item = FoodItem.query.filter_by(id=ingredient.food_item_id)
-            emission = food_item.emission_per_kg
-            quantity = ingredient.quantity
-            equivalent = FoodItemEquivalent.query.filter_by(id=ingredient.food_item_equivalent_id)
-            conversion = equivalent.conversion_factor
-            body["emissions_total"] += emission * conversion * quantity
+            items.append(item)
 
         body["items"] = items
 
