@@ -26,6 +26,11 @@ venv >pytest --cov-report term-missing --cov=climatecook
 venv >set FLASK_APP=climatecook
 ```
 
+Optionally, enable the debugger by setting up the development environment:
+```
+venv >set FLASK_ENV=development
+```
+
 2) Initialize the database with the following command:
 
 ```
