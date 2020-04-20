@@ -33,4 +33,7 @@ def create_app(test_config=None):
     from climatecook import api
     app.register_blueprint(api.api_bp)
 
+    from climatecook import client
+    app.register_blueprint(client.client_bp)
+
     return app
