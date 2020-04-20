@@ -71,7 +71,10 @@ def _get_obj(obj_type):
         return{
             "id": i,
             "name": "test-food-item-{}".format(i),
-            "emission_per_kg": float(i)
+            "emission_per_kg": float(i),
+            "vegan": False,
+            "organic": False,
+            "domestic": False
         }
 
     if(obj_type == "food_item_equivalent"):
@@ -288,7 +291,7 @@ class TestRecipeItem(object):
         _check_control_put_method("edit", client, body, "recipe")
         _check_control_delete_method("clicook:delete", client, body)
         # TODO: Check control for add ingredient once ingredients are implemented.
-        # _check_control_post_method("clicook:add-ingredient", client, body)
+        _check_control_post_method("clicook:add-ingredient", client, body)
         assert "name" in body
         assert "id" in body
         assert "emissions_total" in body
@@ -484,6 +487,42 @@ class TestFoodItemCollection(object):
         body = json.loads(resp.data)
         _check_control_get_method_redirect("profile", client, body)
 
+    def test_post_invalid_name(self, client):
+        """
+        Tests the POST method using an object with invalid name.
+        """
+        valid = _get_obj("food_item")
+        valid["name"] = ""
+        # Name too short
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid["name"] = "E" * 129
+        # Name too long
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_emission(self, client):
+        """
+        Tests the POST method using an object with invalid emission value.
+        """
+        valid = _get_obj("food_item")
+        valid['emission_per_kg'] = "CO2"  # Invalid type
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid['emission_per_kg'] = -1.0  # Invalid value
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
 
 class TestFoodItemResource(object):
 
@@ -541,6 +580,17 @@ class TestFoodItemResource(object):
         body = json.loads(resp.data)
         assert body["name"] == new_name
 
+    def test_put_not_found(self, client):
+        """
+        Test the PUT method with invalid resource url
+        """
+        valid = _get_obj('food_item')
+        valid['id'] = 1
+        resp = client.put(self.INVALID_RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
     def test_put_conflict(self, client):
         """
         Tests the PUT method using a object with conflicting id.
@@ -584,12 +634,52 @@ class TestFoodItemResource(object):
         body = json.loads(resp.data)
         _check_control_get_method_redirect("profile", client, body)
 
+    def test_put_invalid_missing_fields(self, client):
+        """
+        Tests the PUT method using an object with invalid name.
+        """
+        valid = _get_obj("food_item")
+        valid["id"] = 1
+        valid.pop('name')
+        # Name too short
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("food_item")
+        valid["id"] = 1
+        valid.pop('emission_per_kg')
+        # Name too short
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
     def test_put_invalid_id(self, client):
         """
         Tests the PUT method using an object with invalid id.
         """
         valid = _get_obj("food_item")
         valid["id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_emission(self, client):
+        """
+        Tests the PUT method using an object with invalid emission.
+        """
+        valid = _get_obj("food_item")
+        valid["emission_per_kg"] = "CO2"  # Invalid type
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("food_item")
+        valid["emission_per_kg"] = -100.0  # Invalid value
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
@@ -610,3 +700,96 @@ class TestFoodItemResource(object):
         """
         resp = client.delete(self.INVALID_RESOURCE_URL)
         assert resp.status_code == 404
+
+    def test_post_valid(self, client):
+        """
+        Test add-food-item-equivalent with valid equivalent object
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid['food_item_id'] = 1
+        valid['unit_type'] = "millileter"
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 201
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["unit_type"] == "millileter"
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_content_type(self, client):
+        """
+        Test add-food-item-equivalent with an invalid content type
+        """
+        valid = _get_obj("food_item_equivalent")
+        resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
+        assert resp.status_code == 415
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_unit_type(self, client):
+        """
+        Test add-food-item-equivalent with a invalid unit type
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid['food_item_id'] = 1
+        valid['unit_type'] = "kilogram" # Unit type already reserved
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 409
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("food_item_equivalent")
+        valid['food_item_id'] = 1
+        valid['unit_type'] = "lalilulelo" # Invalid value for unit type
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_conversion_factor(self, client):
+        """
+        Test add-food-item-equivalent with a invalid unit conversion factor
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid['food_item_id'] = 1
+        valid['conversion_factor'] = "lalilulelo"  # Invalid type
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("food_item_equivalent")
+        valid['food_item_id'] = 1
+        valid['conversion_factor'] = -1.0  # Invalid value
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_food_item_not_found(self, client):
+        """
+        Test add-food-item-equivalent with an invalid food item id
+        """
+        valid = _get_obj("food_item_equivalent")
+        resp = client.post(self.INVALID_RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_food_item_missing_field(self, client):
+        """
+        Test add-food-item-equivalent with missing fields
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid.pop('unit_type')
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("food_item_equivalent")
+        valid.pop('conversion_factor')
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
