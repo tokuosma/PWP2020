@@ -150,6 +150,7 @@ class FoodItemResource(Resource):
         if request.json is None:
             return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
 
+        food_items = FoodItem.query.all()
         food_item = FoodItem.query.filter_by(id=food_item_id).first()
 
         if food_item is None:

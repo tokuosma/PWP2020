@@ -80,8 +80,6 @@ class RecipeItem(Resource):
         body.add_control_add_ingredient(recipe.id)
         body.add_control("collection", api.url_for(RecipeCollection))
         body.add_control("profile", "/api/profiles/")
-        # TODO: Add control for food-items with equivalents
-        # Is that really needed?
         body["name"] = recipe.name
         body["id"] = recipe.id
 

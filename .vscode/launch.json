@@ -5,6 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: pytest",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "--no-cov"
+            ],
+            // "pythonPath": "${workspaceFolder}/venv/bin",
+            // "program": "${workspaceFolder}/tests/api_test.py"
+        },
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",

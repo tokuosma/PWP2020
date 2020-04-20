@@ -8,7 +8,7 @@ from jsonschema import validate
 
 
 from climatecook import create_app, db
-from climatecook.models import Recipe, FoodItem
+from climatecook.models import Recipe, FoodItem, FoodItemEquivalent
 
 # based on http://flask.pocoo.org/docs/1.0/testing/
 # we don't need a client for database testing, just the db handle
@@ -39,12 +39,20 @@ def _populate_db():
         )
         db.session.add(r)
 
-        i = FoodItem(
+        f = FoodItem(
             id=i,
             name="test-food-item-{}".format(i),
             emission_per_kg=float(i),
         )
-        db.session.add(i)
+        db.session.add(f)
+
+        e = FoodItemEquivalent(
+            food_item_id=i,
+            unit_type="kilogram",
+            conversion_factor=1
+        )
+        db.session.add(e)
+
     db.session.commit()
 
 
@@ -64,6 +72,14 @@ def _get_obj(obj_type):
             "id": i,
             "name": "test-food-item-{}".format(i),
             "emission_per_kg": float(i)
+        }
+
+    if(obj_type == "food_item_equivalent"):
+        return {
+            "id": i,
+            "food_item_id": 1,
+            "conversion_factor": .1,
+            "unit_type": "cup"
         }
 
 
@@ -467,3 +483,130 @@ class TestFoodItemCollection(object):
         assert resp.status_code == 400
         body = json.loads(resp.data)
         _check_control_get_method_redirect("profile", client, body)
+
+
+class TestFoodItemResource(object):
+
+    RESOURCE_URL = "/api/food-items/1/"
+    INVALID_RESOURCE_URL = "/api/food-items/lalilulelo/"
+
+    def test_get(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work.
+        """
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method_redirect("profile", client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_put_method("edit", client, body, "food_item")
+        _check_control_post_method("clicook:add-food-item-equivalent", client, body, "food_item_equivalent")
+        _check_control_delete_method("clicook:delete", client, body)
+        assert "name" in body
+        assert "id" in body
+        assert "emission_per_kg" in body
+        # TODO: Check items controls once ingredients are done
+        assert "items" in body
+
+    def test_get_not_found(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB popluation are present, and their controls.
+        """
+        resp = client.get(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_valid(self, client):
+        """
+        Tests the PUT method using a valid object.
+        """
+        valid = _get_obj("food_item")
+        valid["id"] = 1
+        new_name = "new_name"
+        valid["name"] = new_name
+        # test with valid and see that it exists afterward
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 204
+        resource_url = self.RESOURCE_URL
+        assert resp.headers["Location"].endswith(resource_url)
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["name"] == new_name
+
+    def test_put_conflict(self, client):
+        """
+        Tests the PUT method using a object with conflicting id.
+        """
+        valid = _get_obj("food_item")
+        valid["id"] = 2
+        # test with valid and see that it exists afterward
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 409
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_content_type(self, client):
+        """
+        Tests the PUT with wrong content type.
+        """
+        valid = _get_obj("food_item")
+        # test with valid and see that it exists afterward
+        resp = client.put(self.RESOURCE_URL, data=json.dumps(valid))
+        assert resp.status_code == 415
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_content_name(self, client):
+        """
+        Tests the PUT method using an object with invalid name.
+        """
+        valid = _get_obj("food_item")
+        valid["name"] = ""
+        valid["id"] = 1
+        # Name too short
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid["name"] = "E" * 129
+        # Name too long
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_id(self, client):
+        """
+        Tests the PUT method using an object with invalid id.
+        """
+        valid = _get_obj("food_item")
+        valid["id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_delete(self, client):
+        """
+        Tests the DELETE method using an valid id.
+        """
+        resp = client.delete(self.RESOURCE_URL)
+        assert resp.status_code == 204
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 404
+
+    def test_delete_not_found(self, client):
+        """
+        Tests the DELETE method using an invalid id.
+        """
+        resp = client.delete(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
