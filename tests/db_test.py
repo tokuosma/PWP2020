@@ -391,7 +391,7 @@ def test_ingredient_create_with_invalid_quantity(app_handle):
     fooditemequivalent = FoodItemEquivalent(
         id=food_item_equivalent_id,
         food_item_id=food_item_id,
-        unit_type=10,
+        unit_type="cup",
         conversion_factor=100.0
     )
     # fooditemcategory = FoodItemCategory(

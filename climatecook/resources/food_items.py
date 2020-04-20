@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 from climatecook import db
 from climatecook.api import api, MASON
 from climatecook.resources.masonbuilder import MasonBuilder
-from climatecook.models import FoodItem, FoodItemEquivalent
+from climatecook.models import FoodItem, FoodItemEquivalent, EquivalentUnitType
 
 
 class FoodItemCollection(Resource):
@@ -129,10 +129,18 @@ class FoodItemResource(Resource):
         body['domestic'] = food_item.domestic
         body['organic'] = food_item.organic
 
-        # TODO: Should food item equivalents be added to items?
-        # Probably not, equivalents don't really have a purpose
-        # from a client perspective
-        # body["items"] = items
+        items = []
+        equivalents = FoodItemEquivalent.query.filter_by(food_item_id=food_item.id).all()
+        for equivalent in equivalents:
+            item = FoodItemEquivalentBuilder()
+            item['unit_type'] = equivalent.unit_type
+            item['conversion_factor'] = equivalent.conversion_factor
+            item.add_control("self", api.url_for(FoodItemEquivalentResource,
+                food_item_id=food_item.id,
+                food_item_equivalent_id=equivalent.id))
+            item.add_control('profile', '/api/profiles/')
+            items.append(item)
+        body["items"] = items
         return Response(json.dumps(body), 200, mimetype=MASON)
 
     def post(self, food_item_id):
@@ -248,6 +256,12 @@ class FoodItemEquivalentResource(Resource):
         keys = request.json.keys()
         if not set(["food_item_id", "unit_type", "conversion_factor"]).issubset(keys):
             return MasonBuilder.get_error_response(400, "Incomplete request - missing fields")
+
+        unit_type = request.json['unit_type']
+        if unit_type not in [e.value for e in EquivalentUnitType]:
+            return MasonBuilder.get_error_response(400, "Unknown unit type",
+                "Unknown unit type {}".format(unit_type))
+        food_item_equivalent.unit_type = unit_type
 
         conversion_factor = 0
         try:
@@ -371,13 +385,15 @@ class FoodItemBuilder(MasonBuilder):
             "type": "number"
         }
         props["unit_type"] = {
-            "description": "Enumerable unit type",
-            "type": "number"
+            "description": "Unit type",
+            "type": "string",
+            'enum': [e.value for e in EquivalentUnitType]
         }
         props["conversion_factor"] = {
             "description": "Translates unit to kg",
             "type": "number"
         }
+        return schema
 
 
 class FoodItemEquivalentBuilder(MasonBuilder):

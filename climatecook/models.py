@@ -1,3 +1,5 @@
+import enum
+
 import click
 from flask.cli import with_appcontext
 from sqlalchemy import CheckConstraint
@@ -75,7 +77,7 @@ class FoodItem(db.Model):
 class FoodItemEquivalent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     food_item_id = db.Column(db.Integer, db.ForeignKey('food_item.id', ondelete="CASCADE"), nullable=False)
-    unit_type = db.Column(db.Integer, nullable=False)
+    unit_type = db.Column(db.String, nullable=False)
     conversion_factor = db.Column(db.Float, nullable=False)
 
     food_item = db.relationship("FoodItem", back_populates="food_item_equivalents")
@@ -86,6 +88,18 @@ class FoodItemEquivalent(db.Model):
         db.UniqueConstraint("unit_type", "food_item_id", name="tuc_unit_type_food_item_id")
     )
 
+
+class EquivalentUnitType(enum.Enum):
+    C = 'cup'
+    G = 'gram'
+    KG = 'kilogram'
+    L = 'liter'
+    ML = 'millileter'
+    LB = 'pound'
+    OZ = 'ounce'
+    PT = 'pint'
+    TSP = 'teaspoon'
+    TBSP = 'tablespoon'
 
 # class FoodItemCategory(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
