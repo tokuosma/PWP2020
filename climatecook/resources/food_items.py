@@ -212,13 +212,6 @@ class FoodItemResource(Resource):
         return Response(None, 204)
 
 
-class FoodItemEquivalentCollection(Resource):
-
-    def get(self):
-        # TODO: Get food item - equivalent pairs
-        pass
-
-
 class FoodItemEquivalentResource(Resource):
     def get(self, food_item_id, food_item_equivalent_id):
         body = FoodItemEquivalentBuilder()
@@ -333,7 +326,7 @@ class FoodItemBuilder(MasonBuilder):
             method="POST",
             encoding="json",
             title="Add a new food item equivalent",
-            schema=FoodItemBuilder.food_item_equivalent_schema  # Added food item equivalent schema
+            schema=FoodItemBuilder.food_item_equivalent_schema()
         )
 
     @staticmethod
