@@ -8,7 +8,7 @@ from jsonschema import validate
 
 
 from climatecook import create_app, db
-from climatecook.models import Recipe, FoodItem, FoodItemEquivalent
+from climatecook.models import Recipe, FoodItem, FoodItemEquivalent, Ingredient
 
 # based on http://flask.pocoo.org/docs/1.0/testing/
 # we don't need a client for database testing, just the db handle
@@ -37,7 +37,7 @@ def _populate_db():
             id=i,
             name="test-recipe-{}".format(i)
         )
-        db.session.add(r)
+        db.session.add(r)        
 
         f = FoodItem(
             id=i,
@@ -52,6 +52,15 @@ def _populate_db():
             conversion_factor=1
         )
         db.session.add(e)
+
+        # g = Ingredient(
+        #     id=i,
+        #     recipe_id=i,
+        #     food_item_id=i,
+        #     food_item_equivalent_id=i,
+        #     quantity=1.0,
+        # )
+        # db.session.add(g)
 
     db.session.commit()
 
@@ -83,6 +92,15 @@ def _get_obj(obj_type):
             "food_item_id": 1,
             "conversion_factor": .1,
             "unit_type": "cup"
+        }
+
+    if(obj_type == "ingredient"):
+        return {
+            "id": i,
+            "recipe_id": 1,
+            "food_item_id": 1,
+            "food_item_equivalent_id": 1,
+            "quantity": 1.0
         }
 
 
@@ -289,9 +307,8 @@ class TestRecipeItem(object):
         _check_control_get_method_redirect("profile", client, body)
         _check_control_get_method("self", client, body)
         _check_control_put_method("edit", client, body, "recipe")
+        _check_control_post_method("clicook:add-ingredient", client, body, "ingredient")
         _check_control_delete_method("clicook:delete", client, body)
-        # TODO: Check control for add ingredient once ingredients are implemented.
-        _check_control_post_method("clicook:add-ingredient", client, body)
         assert "name" in body
         assert "id" in body
         assert "emissions_total" in body

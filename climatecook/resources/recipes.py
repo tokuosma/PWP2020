@@ -148,6 +148,9 @@ class RecipeItem(Resource):
         return response
 
     def delete(self, recipe_id):
+        """
+        Delete recipe
+        """
         recipe = Recipe.query.filter_by(id=recipe_id).first()
         if recipe is None:
             return MasonBuilder.get_error_response(404, "Recipe not found.",
@@ -156,6 +159,62 @@ class RecipeItem(Resource):
         db.session.delete(recipe)
         db.session.commit()
         return Response(None, 204)
+
+    def post(self, recipe_id):
+        """
+        Add new ingredient to recipe
+        """
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
+
+        recipe = Recipe.query.filter_by(id=recipe_id).first()
+
+        if recipe is None:
+            return MasonBuilder.get_error_response(404, "Recipe not found.",
+            "Recipe with id {0} not found".format(recipe_id))
+
+        # ingredients = Ingredient.query.filter_by(recipe_id=recipe.id).all()
+
+        keys = request.json.keys()
+        if not set(["food_item_id", "food_item_equivalent_id", "quantity"]).issubset(keys):
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", "")
+
+        food_item = FoodItem.query.filter_by(id=request.json['food_item_id']).first()
+        if food_item is None:
+            return MasonBuilder.get_error_response(404, "FoodItem not found.",
+            "FoodItem with id {0} not found".format(request.json['food_item_id']))
+
+        food_item_equivalent = FoodItemEquivalent.query.filter_by(food_item_id=food_item.id) \
+            .filter_by(id=request.json['food_item_equivalent_id']).first()
+
+        if food_item_equivalent is None:
+            return MasonBuilder.get_error_response(404, "FoodItemEquivalent not found.",
+            "FoodItemEquivalent with id {0} not found".format(request.json['food_item_equivalent_id']))
+
+        quantity = 0
+        try:
+            quantity = float(request.json['quantity'])
+            if quantity <= 0:
+                raise ValueError
+        except ValueError:
+            return MasonBuilder.get_error_response(400, "Quantity must be a positive number", "")
+
+        ingredient = Ingredient(
+            recipe_id=recipe.id,
+            food_item_id=food_item.id,
+            food_item_equivalent_id=food_item_equivalent.id,
+            quantity=quantity
+        )
+
+        db.session.add(ingredient)
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(IngredientItem,
+                recipe_id=recipe.id,
+                ingredient_id=ingredient.id)
+        }
+        response = Response(None, 201, headers=headers)
+        return response
 
 
 class IngredientItem(Resource):
@@ -261,7 +320,7 @@ class RecipeBuilder(MasonBuilder):
             method="POST",
             encoding="json",
             title="Add a new ingredient",
-            schema=RecipeBuilder.ingredient_schema()  # Added ingredient schema
+            schema=IngredientBuilder.ingredient_schema()  # Added ingredient schema
         )
 
     @staticmethod
@@ -277,6 +336,29 @@ class RecipeBuilder(MasonBuilder):
             "type": "string"
         }
         return schema
+    
+
+class IngredientBuilder(MasonBuilder):
+
+    def add_control_edit_ingredient(self, recipe_id, ingredient_id):
+        self.add_control(
+            "edit",
+            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
+            method="PUT",
+            encoding="json",
+            title="Edit an ingredient",
+            schema=RecipeBuilder.ingredient_schema()
+        )
+
+    def add_control_delete_ingredient(self, recipe_id, ingredient_id):
+        self.add_control(
+            "clicook:delete",
+            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
+            method="DELETE",
+            encoding="json",
+            title="Delete an ingredient",
+            schema=RecipeBuilder.ingredient_schema()
+        )
 
     @staticmethod
     def ingredient_schema():
@@ -301,26 +383,4 @@ class RecipeBuilder(MasonBuilder):
             "description": "Amount of food item",
             "type": "number"
         }
-
-
-class IngredientBuilder(MasonBuilder):
-
-    def add_control_edit_ingredient(self, recipe_id, ingredient_id):
-        self.add_control(
-            "edit",
-            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
-            method="PUT",
-            encoding="json",
-            title="Edit an ingredient",
-            schema=RecipeBuilder.ingredient_schema()
-        )
-
-    def add_control_delete_ingredient(self, recipe_id, ingredient_id):
-        self.add_control(
-            "clicook:delete",
-            href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
-            method="DELETE",
-            encoding="json",
-            title="Delete an ingredient",
-            schema=RecipeBuilder.ingredient_schema()
-        )
+        return schema

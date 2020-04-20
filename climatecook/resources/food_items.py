@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 from climatecook import db
 from climatecook.api import api, MASON
 from climatecook.resources.masonbuilder import MasonBuilder
-from climatecook.models import FoodItem, FoodItemEquivalent, EquivalentUnitType
+from climatecook.models import FoodItem, FoodItemEquivalent, EquivalentUnitType, Ingredient
 
 
 class FoodItemCollection(Resource):
@@ -263,6 +263,12 @@ class FoodItemResource(Resource):
         if food_item is None:
             return MasonBuilder.get_error_response(404, "FoodItem not found.",
             "FoodItem with id {0} not found".format(food_item_id))
+
+        num_ingredient = Ingredient.query.filter_by(food_item_id=food_item.id).count()
+        if num_ingredient > 0:
+            return MasonBuilder.get_error_response(409, "Cannot delete food item in use.",
+            "FoodItem with is used for {0} ingredients".format(num_ingredient))
+            
         db.session.delete(food_item)
         db.session.commit()
         return Response(None, 204)
