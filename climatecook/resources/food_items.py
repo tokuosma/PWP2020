@@ -144,7 +144,55 @@ class FoodItemResource(Resource):
         return Response(json.dumps(body), 200, mimetype=MASON)
 
     def post(self, food_item_id):
-        raise NotImplementedError
+        """
+        Add food item equivalent
+        """
+        if request.json is None:
+            return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
+
+        food_item = FoodItem.query.filter_by(id=food_item_id).first()
+
+        if food_item is None:
+            return MasonBuilder.get_error_response(404, "Food item not found.",
+            "FoodItem with id {0} not found".format(food_item_id))
+
+        equivalents = FoodItemEquivalent.query.filter_by(food_item_id=food_item.id).all()
+
+        keys = request.json.keys()
+        if not set(["unit_type", "conversion_factor"]).issubset(keys):
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", "")
+
+        unit_type = request.json['unit_type']
+        if unit_type not in [e.value for e in EquivalentUnitType]:
+            return MasonBuilder.get_error_response(400, "Unknown unit type",
+                "Unknown unit type {}".format(unit_type))
+        if unit_type in [e.unit_type for e in equivalents]:
+            return MasonBuilder.get_error_response(409, "Unit type is reserved",
+            "Food item equivalent with unit type {} already exists".format(unit_type))
+
+        conversion_factor = 0
+        try:
+            conversion_factor = float(request.json['conversion_factor'])
+            if conversion_factor < 0:
+                raise ValueError
+        except ValueError:
+            return MasonBuilder.get_error_response(400, "Conversion factor must be a positive number", "")
+
+        food_item_equivalent = FoodItemEquivalent(
+            food_item_id=food_item.id,
+            unit_type=unit_type,
+            conversion_factor=conversion_factor
+        )
+
+        db.session.add(food_item_equivalent)
+        db.session.commit()
+        headers = {
+            "Location": api.url_for(FoodItemEquivalentResource,
+                food_item_id=food_item.id,
+                food_item_equivalent_id=food_item_equivalent.id)
+        }
+        response = Response(None, 201, headers=headers)
+        return response
 
     def put(self, food_item_id):
         if request.json is None:
