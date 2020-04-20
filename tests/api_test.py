@@ -37,7 +37,7 @@ def _populate_db():
             id=i,
             name="test-recipe-{}".format(i)
         )
-        db.session.add(r)        
+        db.session.add(r)
 
         f = FoodItem(
             id=i,
@@ -312,8 +312,11 @@ class TestRecipeItem(object):
         assert "name" in body
         assert "id" in body
         assert "emissions_total" in body
-        # TODO: Check items controls once ingredients are done
         assert "items" in body
+        items = body['items']
+        for item in items:
+            _check_control_get_method("self", client, item)
+            _check_control_get_method_redirect("profile", client, item)
 
     def test_get_not_found(self, client):
         """
@@ -413,6 +416,84 @@ class TestRecipeItem(object):
         """
         resp = client.delete(self.INVALID_RESOURCE_URL)
         assert resp.status_code == 404
+
+    def test_post_valid(self, client):
+        """
+        Test the POST method using a valid ingredient.
+        """
+        valid = _get_obj("ingredient")
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 201
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_not_found(self, client):
+        """
+        Test the POST method using invalid id's.
+        """
+        valid = _get_obj("ingredient")
+        resp = client.post(self.INVALID_RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid['food_item_id'] = "99999"
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("ingredient")
+        valid['food_item_equivalent_id'] = "99999"
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_missing_fields(self, client):
+        """
+        Test the POST method using with missing required fields
+        """
+        valid = _get_obj("ingredient")
+        valid.pop('food_item_id')
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("ingredient")
+        valid.pop('food_item_equivalent_id')
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("ingredient")
+        valid.pop('quantity')
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_post_invalid_quantity(self, client):
+        """
+        Test the POST method using with missing required fields
+        """
+        valid = _get_obj("ingredient")
+        valid['quantity'] = "lalilulelo"
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+        valid = _get_obj("ingredient")
+        valid['quantity'] = -1.0
+        resp = client.post(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
 
 
 class TestFoodItemCollection(object):
@@ -749,7 +830,7 @@ class TestFoodItemResource(object):
         """
         valid = _get_obj("food_item_equivalent")
         valid['food_item_id'] = 1
-        valid['unit_type'] = "kilogram" # Unit type already reserved
+        valid['unit_type'] = "kilogram"  # Unit type already reserved
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 409
         body = json.loads(resp.data)
@@ -757,7 +838,7 @@ class TestFoodItemResource(object):
 
         valid = _get_obj("food_item_equivalent")
         valid['food_item_id'] = 1
-        valid['unit_type'] = "lalilulelo" # Invalid value for unit type
+        valid['unit_type'] = "lalilulelo"  # Invalid value for unit type
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)

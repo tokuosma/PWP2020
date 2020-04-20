@@ -336,7 +336,7 @@ class RecipeBuilder(MasonBuilder):
             "type": "string"
         }
         return schema
-    
+
 
 class IngredientBuilder(MasonBuilder):
 
@@ -347,7 +347,7 @@ class IngredientBuilder(MasonBuilder):
             method="PUT",
             encoding="json",
             title="Edit an ingredient",
-            schema=RecipeBuilder.ingredient_schema()
+            schema=IngredientBuilder.ingredient_schema()
         )
 
     def add_control_delete_ingredient(self, recipe_id, ingredient_id):
@@ -357,7 +357,7 @@ class IngredientBuilder(MasonBuilder):
             method="DELETE",
             encoding="json",
             title="Delete an ingredient",
-            schema=RecipeBuilder.ingredient_schema()
+            schema=IngredientBuilder.ingredient_schema()
         )
 
     @staticmethod

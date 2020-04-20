@@ -268,7 +268,7 @@ class FoodItemResource(Resource):
         if num_ingredient > 0:
             return MasonBuilder.get_error_response(409, "Cannot delete food item in use.",
             "FoodItem with is used for {0} ingredients".format(num_ingredient))
-            
+
         db.session.delete(food_item)
         db.session.commit()
         return Response(None, 204)
@@ -330,12 +330,14 @@ class FoodItemEquivalentResource(Resource):
             try:
                 new_id = int(request.json['id'])
                 if new_id is not None:
-                    if new_id != food_item_equivalent.id and FoodItemEquivalent.query.filter_by(id=new_id).first() is not None:
+                    if new_id != food_item_equivalent.id and FoodItemEquivalent.query \
+                            .filter_by(id=new_id).first() is not None:
                         return MasonBuilder.get_error_response(409, "FoodItemEquivalent id is already taken",
                             "FoodItemEquivalent id {0} is already taken".format(new_id))
 
                     if new_id < 0:
-                        return MasonBuilder.get_error_response(400, "FoodItemEquivalent id must be a positive integer", "")
+                        return MasonBuilder.get_error_response(400,
+                            "FoodItemEquivalent id must be a positive integer", "")
                     food_item_equivalent.id = new_id
             except ValueError:
                 return MasonBuilder.get_error_response(400, "FoodItemEquivalent id must be a positive integer", "")
