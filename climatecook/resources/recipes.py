@@ -31,12 +31,22 @@ class RecipeCollection(Resource):
 
         for recipe in recipes:
             item = RecipeBuilder()
+            item['id'] = recipe.id
             item['name'] = recipe.name
             item.add_control("self", api.url_for(RecipeItem, recipe_id=recipe.id))
             item.add_control("profile", "/api/profiles/")
             items.append(item)
 
+            ingredients = Ingredient.query.filter_by(recipe_id=recipe.id).all()
+            emissions_total = 0
+            for ingredient in ingredients:
+                emissions_total += ingredient.food_item.emission_per_kg \
+                    * ingredient.quantity \
+                    * ingredient.food_item_equivalent.conversion_factor
+            item['emissions_total'] = emissions_total
+
         body["items"] = items
+
         return Response(json.dumps(body), 200, mimetype=MASON)
 
     def post(self):

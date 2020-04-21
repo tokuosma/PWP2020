@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fa_all.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/datatables.min.css') }}">
+    <title>Climatecook - Recipes</title>
+</head>
+
+<body> 
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('client.index') }}"><i class="fas fa-seedling"></i> Climatecook</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('client.index') }}">Index</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="{{ url_for('client.recipes') }}">Recipes <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('client.food_items') }}">Food items</a>
+            </li>
+          </ul>
+        </div>
+    </nav>
+    <div class="container p-3 my-3 border">
+        <h1>Recipes</h1>
+        <div class="row">
+            <div class="col-lg-12">
+                <table style="width: 100%;" id="dt-table-recipes" class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Emissions total</th>
+                            <th>
+                                <button type="button" class="btn btn-primary">Add Recipe</button>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/jquery-3.5.0.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/popper.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/bootstrap.bundle.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/datatables.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+
+<script>
+    
+    $(document).ready(function(e){
+        var dt = $('#dt-table-recipes').DataTable({
+            ajax: {
+                url: '{{ url_for("api.recipecollection") }}',
+                dataSrc: 'items' 
+            },
+            columns: [
+                { "data": "name" },
+                { "data": "emissions_total" },
+                {
+                    "data": null,
+                    "defaultContent":"",
+                    "render": renderRowButtons
+                }
+            ],
+            drawCallback: initTableButtons
+        }).on('xhr', function(e,settings, json, xhr){
+            // Do stuff with the full collection response here if needed
+            console.log(json)
+        });
+    });
+
+    function renderRowButtons(data, type, row, meta){
+        markup = "";
+        url = '{{ url_for("client.show_recipe", recipe_id="_recipe_id_") }}';
+        if(row['@controls']){
+            var controls = row['@controls'];
+            for (control in controls){
+                if(control === 'self'){
+                    markup = '<a class="btn btn-primary show-recipe" target="_blank" '
+                    + `href="${url.replace('_recipe_id_',row['id'])}">Show Recipe</a>`   
+                }
+            }
+        }
+        return markup;
+    }
+
+    function initTableButtons(settings){
+    }
+</script>
