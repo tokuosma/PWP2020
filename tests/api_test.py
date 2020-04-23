@@ -53,14 +53,14 @@ def _populate_db():
         )
         db.session.add(e)
 
-        # g = Ingredient(
-        #     id=i,
-        #     recipe_id=i,
-        #     food_item_id=i,
-        #     food_item_equivalent_id=i,
-        #     quantity=1.0,
-        # )
-        # db.session.add(g)
+        g = Ingredient(
+            id=i,
+            recipe_id=i,
+            food_item_id=i,
+            food_item_equivalent_id=i,
+            quantity=1.0,
+        )
+        db.session.add(g)
 
     db.session.commit()
 
@@ -496,6 +496,178 @@ class TestRecipeItem(object):
         _check_control_get_method_redirect("profile", client, body)
 
 
+class TestIngredientItem(object):
+
+    RESOURCE_URL = "/api/recipes/1/ingredients/1"
+    INVALID_RESOURCE_URL = "/api/recipes/1/ingredients/lalilulelo"
+
+    def test_get(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB population are present, and their controls.
+        """
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        body.json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_post_method("edit", client, body, "ingredient")
+        _check_control_delete_method("clicook:delete", client, body)
+
+        assert "id" in body
+        assert "recipe_id" in body
+        assert "food_item_id" in body
+        assert "food_item_equivalent_id" in body
+        assert "quantity" in body
+
+    def test_get_not_found(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB popluation are present, and their controls.
+        """
+        resp = client.get(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_valid(self, client):
+        """
+        Tests the PUT method using a valid object.
+        """
+        valid = _get_obj("ingredient")
+        valid["id"] = 1
+        new_quantity = 58.50
+        valid["quantity"] = new_quantity
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 204
+        resource_url = self.RESOURCE_URL
+        assert resp.headers["Location"].endswith(resource_url)
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["quantity"] == new_quantity
+
+    def test_put_not_found(self, client):
+        """
+        Test the PUT method with invalid resource url
+        """
+        valid = _get_obj("ingredient")
+        valid["id"] = 1
+        resp = client.put(self.INVALID_RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_conflict(self, client):
+        """
+        Tests the PUT method using a object with conflicting id.
+        """
+        valid = _get_obj("ingredient")
+        valid["id"] = 2
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 409
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_content_type(self, client):
+        """
+        Tests the PUT with wrong content type.
+        """
+        valid = _get_obj("ingredient")
+        resp = client.put(self.RESOURCE_URL, data=json.dumps(valid))
+        assert resp.status_code == 415
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_missing_fields(self, client):
+        """
+        Tests the PUT method using an object with missing resource id.
+        """
+        valid = _get_obj("ingredient")
+        valid["id"] = 1
+        valid.pop("resource_id")
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_id(self, client):
+        """
+        Tests the PUT method using an object with invalid id.
+        """
+        valid = _get_obj("ingredient")
+        valid["id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_recipe_id(self, client):
+        """
+        Tests the PUT method using an object with invalid recipe id.
+        """
+        valid = _get_obj("ingredient")
+        valid["recipe_id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_food_item_id(self, client):
+        """
+        Tests the PUT method using an object with invalid food item id.
+        """
+        valid = _get_obj("ingredient")
+        valid["food_item_id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_food_item_equivalent_id(self, client):
+        """
+        Tests the PUT method using an object with invalid equivalent id.
+        """
+        valid = _get_obj("ingredient")
+        valid["food_item_equivalent_id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_quantity(self, client):
+        """
+        Tests the PUT method using an object with invalid quantity.
+        """
+        valid = _get_obj("ingredient")
+        valid["quantity"] = "lalilulelo"
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_delete(self, client):
+        """
+        Tests the DELETE method using an valid id.
+        """
+        resp = client.delete(self.RESOURCE_URL)
+        assert resp.status_code == 204
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 404
+
+    def test_delete_not_found(self, client):
+        """
+        Tests the DELETE method using an invalid id.
+        """
+        resp = client.delete(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
+
+
 class TestFoodItemCollection(object):
 
     RESOURCE_URL = "/api/food-items/"
@@ -891,3 +1063,163 @@ class TestFoodItemResource(object):
         assert resp.status_code == 400
         body = json.loads(resp.data)
         _check_control_get_method_redirect("profile", client, body)
+
+
+class TestFoodItemEquivalentResource(object):
+
+    RESOURCE_URL = "/api/food-items/1/equivalents/1/"
+    INVALID_RESOURCE_URL = "/api/food-items/1/equivalents/lalilulelo"
+
+    def test_get(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB population are present, and their controls.
+        """
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        body.json.loads(resp.data)
+        _check_namespace(client, body)
+        _check_control_get_method("self", client, body)
+        _check_control_post_method("edit", client, body, "ingredient")
+        _check_control_delete_method("clicook:delete", client, body)
+
+        assert "id" in body
+        assert "food_item_id" in body
+        assert "unit_type" in body
+        assert "conversion_factor" in body
+
+    def test_get_not_found(self, client):
+        """
+        Tests the GET method. Checks that the response status code is 200, and
+        then checks that all of the expected attributes and controls are
+        present, and the controls work. Also checks that all of the items from
+        the DB popluation are present, and their controls.
+        """
+        resp = client.get(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_valid(self, client):
+        """
+        Tests the PUT method using a valid object.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["id"] = 1
+        new_conversion_factor = 1000.0
+        valid["conversion_factor"] = new_conversion_factor
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 204
+        resource_url = self.RESOURCE_URL
+        assert resp.headers["Location"].endswith(resource_url)
+        resp = client.get(resp.headers["Location"])
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert body["conversion_factor"] == new_conversion_factor
+
+    def test_put_not_found(self, client):
+        """
+        Test the PUT method with invalid resource url
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["id"] = 1
+        resp = client.put(self.INVALID_RESOURCE_URL, json=valid)
+        assert resp.status_code == 404
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_conflict(self, client):
+        """
+        Tests the PUT method using a object with conflicting id.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["id"] = 2
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 409
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_content_type(self, client):
+        """
+        Tests the PUT with wrong content type.
+        """
+        valid = _get_obj("food_item_equivalent")
+        resp = client.put(self.RESOURCE_URL, data=json.dumps(valid))
+        assert resp.status_code == 415
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_missing_fields(self, client):
+        """
+        Tests the PUT method using an object with missing food item id.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["id"] = 1
+        valid.pop("food_item_id")
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_id(self, client):
+        """
+        Tests the PUT method using an object with invalid id.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_food_item_id(self, client):
+        """
+        Tests the PUT method using an object with invalid food item id.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["food_item_id"] = -1000
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile". client, body)
+
+    def test_put_invalid_unit_type(self, client):
+        """
+        Tests the PUT method using an object with invalid unit type.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["unit_type"] = "lalilulelo"
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_put_invalid_conversion_factor(self, client):
+        """
+        Tests the PUT method using an object with invalid conversion factor.
+        """
+        valid = _get_obj("food_item_equivalent")
+        valid["conversion_factor"] = "lalilulelo"
+        resp = client.put(self.RESOURCE_URL, json=valid)
+        assert resp.status_code == 400
+        body = json.loads(resp.data)
+        _check_control_get_method_redirect("profile", client, body)
+
+    def test_delete(self, client):
+        """
+        Tests the DELETE method using an valid id.
+        """
+        resp = client.delete(self.RESOURCE_URL)
+        assert resp.status_code == 204
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 404
+
+    def test_delete_not_found(self, client):
+        """
+        Tests the DELETE method using an invalid id.
+        """
+        resp = client.delete(self.INVALID_RESOURCE_URL)
+        assert resp.status_code == 404
