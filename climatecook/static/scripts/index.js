@@ -20,7 +20,7 @@ $(document).ready(function(e){
             $(navItem).find('button')
             .text(control.title)
             .click((click) => {
-                showCollection(control.href, "Recipes");
+                showResource(control.href, "Recipes");
             });
         }
         if(controls[RELATIONS.FOOD_ITEMS]){
@@ -30,17 +30,17 @@ $(document).ready(function(e){
             $(navItem).find('button')
             .text(control.title)
             .click((click) => {
-                showCollection(control.href, "Food Items");
+                showResource(control.href, "Food Items");
             });
         }
     });
 });
 
-function showCollection(href, title){
+function showResource(href, title){
     let mainContainer = $('div#mainContainer');
     let title_h = mainContainer.find('h1.title');
-    let controls = mainContainer.find('div.controls');
-    let data_div =  mainContainer.find('div.controls')
+    let controls_div = mainContainer.find('div.controls');
+    let data_div =  mainContainer.find('div.controls');
     let items_div = mainContainer.find('div.items');
 
     clearMainContainer();
@@ -51,9 +51,42 @@ function showCollection(href, title){
 
     $.get(href, function(r){
         renderData(r, data_div);
+        let controls = r['@controls'];
+        renderControls(r, controls, controls_div);
         let items = r.items;
         renderItems(items, items_div);
     });
+}
+
+function renderControls(r, controls, target){
+
+    let control_self = controls['self'];
+
+    for(let key in controls){
+        let name = key;
+        let control = controls[key];
+        let button = $.parseHTML(`<button class="btn mx-2 btn-primary">${name}</button>`);
+
+        switch(control.method){
+            case "POST":
+                $(button).click(() => {
+                    showForm(control.href, control.method, control.schema, null, control_self.href, name);
+                });
+                break;
+            case "PUT":
+                break;
+
+            case "DELETE":
+                break;
+
+            default:
+                $(button).click(() => { 
+                    showResource(control.href, control.href); 
+                });
+                break;
+        }
+        $(target).append(button);
+    }
 }
 
 function renderData(r, target){
@@ -124,6 +157,74 @@ function renderItems(items, target){
     }
 }
 
+function showForm(url, method, schema, data, returnUrl, title){
+    
+    clearMainContainer();
+
+    let mainContainer = $('div#mainContainer');
+    let controls_div = mainContainer.find('div.controls');
+    let data_div =  mainContainer.find('div.controls');
+    let title_h = mainContainer.find('h1.title');
+    title_h.text(title);
+    
+    let form = $.parseHTML(`<form action="${url} method=${method}"></form>`);
+
+    for(let fieldName in schema.properties){
+        let field = schema.properties[fieldName];
+        let label = fieldName;
+        let required = (fieldName in schema.required);
+        if(required){
+            label += "*";
+        }
+        
+        if( field.enum ){
+            // Add select for enum
+            let inputGroup = $.parseHTML($('template#form-input-select-template').html());
+            $(inputGroup).find('label').text(label);
+
+            let select = $(inputGroup).find('select');
+            for(let key in field.enum){
+                $(select).append(`<option>${key}</option>`);
+            }
+
+            $(form).append(inputGroup);
+        }
+        else{
+            // Add normal input
+            let inputGroup = $.parseHTML($('template#form-input-text-template').html());
+            $(inputGroup).find('label').text(label);
+            let input = $(inputGroup).find('input');
+            input.attr('name', fieldName);
+            if(required){
+                input.attr('required', true);
+            }
+            $(form).append(inputGroup);
+        }
+    }
+
+    $(form).append(`<button type="button" class="cancel btn btn-default mx-3">Back</button><button class="btn btn-primary mx-3">Save</button>`);
+    $(data_div).append(form);
+
+
+    $(form).submit( function(event){
+        event.preventDefault();
+        $.ajax({
+            url: url,
+            method: method,
+            contentType : "application/json",
+            data: JSON.stringify(getFormData($(form))),
+            success: () =>{
+                showResource(returnUrl, returnUrl);
+            }
+        });
+    });
+
+    $(form).find('button.cancel').click(function(event){
+        showResource(returnUrl, returnUrl);
+    });
+
+}
+
 function clearMainContainer(){
     let mainContainer = $('div#mainContainer');
     mainContainer.find('h1.title').empty();
@@ -137,6 +238,18 @@ function clearMainContainer(){
         dt.destroy();
     }
 
+}
+
+function getFormData($form){
+    // from: https://stackoverflow.com/a/11339012/7229327
+    var unindexed_array = $form.serializeArray();
+    var indexed_array = {};
+
+    $.map(unindexed_array, function(n, i){
+        indexed_array[n['name']] = n['value'];
+    });
+
+    return indexed_array;
 }
 
 function renderControlsDT(data, type, row, meta){
@@ -158,7 +271,7 @@ function initControlsDT(table){
             name = url;
         }
         $.get(url, function(r){
-            showCollection(url, name);
+            showResource(url, name);
         });
     });
 }
