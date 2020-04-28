@@ -1,0 +1,8 @@
+{
+    "globals": {
+        "$": false,
+        "document":false,
+        "console":false
+    },
+    "esversion":6
+}

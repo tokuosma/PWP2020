@@ -30,8 +30,8 @@ api.add_resource(FoodItemEquivalentResource, "/food-items/<food_item_id>/equival
 def api_entry():
     masonBuilder = MasonBuilder()
     masonBuilder.add_namespace("clicook", "/api/link-relations/")
-    masonBuilder.add_control("clicook:recipes-all", api.url_for(RecipeCollection))
-    masonBuilder.add_control("clicook:food-items-all", api.url_for(FoodItemCollection))
+    masonBuilder.add_control("clicook:recipes-all", api.url_for(RecipeCollection), title="Recipes")
+    masonBuilder.add_control("clicook:food-items-all", api.url_for(FoodItemCollection), title="Food items")
     # TODO: ADD MISSING CONTROLS FOR API ENTRY
     return Response(json.dumps(masonBuilder), 200, mimetype=MASON)
 

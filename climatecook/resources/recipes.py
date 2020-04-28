@@ -16,7 +16,7 @@ class RecipeCollection(Resource):
         body.add_namespace("clicook", "/api/link-relations/")
         body.add_control("self", api.url_for(RecipeCollection))
         from climatecook.resources.food_items import FoodItemCollection
-        body.add_control("clicook:food-items-all", api.url_for(FoodItemCollection))
+        body.add_control("clicook:food-items-all", api.url_for(FoodItemCollection), title="Food items")
         body.add_control_add_recipe()
 
         items = []
