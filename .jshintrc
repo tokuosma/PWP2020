@@ -3,7 +3,8 @@
         "$": false,
         "document":false,
         "console":false,
-        "toastr":false
+        "toastr":false,
+        "bootbox":false
     },
     "esversion":6
 }

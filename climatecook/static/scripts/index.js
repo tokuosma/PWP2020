@@ -2,6 +2,7 @@
 "use strict";
 
 const API_URL = "/api/";
+const CLIENT_URL = "/client/";
 
 const RELATIONS = {
     RECIPES : "clicook:recipes-all",
@@ -60,29 +61,62 @@ function showResource(href, title){
 
 function renderControls(r, controls, target){
 
-    let control_self = controls['self'];
+    // Select control to return to if we open a form
+    let control_self = controls.self;
+
+    // Select control to return to if the item is deleted
+    let control_return;
+    if(controls.collection){
+        control_return = controls.collection;
+    } else if(controls.up){
+        control_return = controls.up;
+    } else{
+        control_return = { href: API_URL };
+    }
 
     for(let key in controls){
         let name = key;
         let control = controls[key];
-        let button = $.parseHTML(`<button class="btn mx-2 btn-primary">${name}</button>`);
+        let button = $.parseHTML(`<button class="btn mx-2">${name}</button>`);
 
         switch(control.method){
             case "POST":
+                $(button).addClass('btn-primary');
                 $(button).click(() => {
                     showForm(control.href, control.method, control.schema, null, control_self.href, name);
                 });
                 break;
             case "PUT":
+                $(button).addClass('btn-primary');
                 $(button).click(() => {
                     showForm(control.href, control.method, control.schema, r, control_self.href, "EDIT: " + control_self.href);
                 });
                 break;
 
             case "DELETE":
+                $(button).addClass('btn-danger');
+                $(button).click(() => {
+                    bootbox.confirm({
+                        message: "Are you sure you want to delete this item?",
+                        callback: function(result){
+                            if(result){
+                                $.ajax({
+                                    url: control.href,
+                                    method: "DELETE",
+                                    success: function(r){
+                                        showResource(control_return.href, control_return.href);
+                                        toastr.success("Item deleted", "Success!");
+                                    },
+                                    error: handleAjaxError
+                                });
+                            }
+                        }
+                    });
+                });
                 break;
 
             default:
+                $(button).addClass('btn-link');
                 $(button).click(() => { 
                     showResource(control.href, control.href); 
                 });
@@ -243,6 +277,7 @@ function showForm(url, method, schema, data, returnUrl, title){
             data: JSON.stringify(getFormData($(form))),
             success: () =>{
                 showResource(returnUrl, returnUrl);
+                toastr.success("Item saved", "Success!");
             },
             error: handleAjaxError
         });
