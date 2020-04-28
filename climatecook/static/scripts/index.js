@@ -74,6 +74,9 @@ function renderControls(r, controls, target){
                 });
                 break;
             case "PUT":
+                $(button).click(() => {
+                    showForm(control.href, control.method, control.schema, r, control_self.href, "EDIT: " + control_self.href);
+                });
                 break;
 
             case "DELETE":
@@ -172,24 +175,45 @@ function showForm(url, method, schema, data, returnUrl, title){
     for(let fieldName in schema.properties){
         let field = schema.properties[fieldName];
         let label = fieldName;
-        let required = (fieldName in schema.required);
+        let required = (schema.required.indexOf(fieldName) >= 0);
         if(required){
             label += "*";
         }
-        
-        if( field.enum ){
+        if(field.type === 'boolean'){
+            // Add checkbox
+            let inputGroup = $.parseHTML($('template#form-input-boolean-template').html());
+            $(inputGroup).find('label').append(label);
+            let input = $(inputGroup).find('input');
+            input.attr('name', fieldName);
+            if(required){
+                input.attr('required', true);
+            }
+            if(data && fieldName in data){
+                let value = data[fieldName];
+                input.prop('checked', value);
+            }
+            $(form).append(inputGroup);
+
+        } else if( field.enum ){
             // Add select for enum
             let inputGroup = $.parseHTML($('template#form-input-select-template').html());
             $(inputGroup).find('label').text(label);
 
             let select = $(inputGroup).find('select');
-            for(let key in field.enum){
-                $(select).append(`<option>${key}</option>`);
+            select.attr('name', fieldName);
+            if(required){
+                select.attr('required', true);
             }
-
+            for(let key in field.enum){
+                $(select).append(`<option>${field.enum[key]}</option>`);
+            }
+            if(data && fieldName in data){
+                let value = data[fieldName];
+                select.val(value);
+            }
             $(form).append(inputGroup);
-        }
-        else{
+
+        } else{
             // Add normal input
             let inputGroup = $.parseHTML($('template#form-input-text-template').html());
             $(inputGroup).find('label').text(label);
@@ -197,6 +221,10 @@ function showForm(url, method, schema, data, returnUrl, title){
             input.attr('name', fieldName);
             if(required){
                 input.attr('required', true);
+            }
+            if(data && fieldName in data){
+                let value = data[fieldName];
+                input.val(value);
             }
             $(form).append(inputGroup);
         }
@@ -243,7 +271,10 @@ function clearMainContainer(){
 
 function getFormData($form){
     // from: https://stackoverflow.com/a/11339012/7229327
-    var unindexed_array = $form.serializeArray();
+    var unindexed_array = $form.serializeArray({
+        // jQuery extension, see extensions.js
+        checkboxesAsBools: true
+    });
     var indexed_array = {};
 
     $.map(unindexed_array, function(n, i){
@@ -268,7 +299,7 @@ function initControlsDT(table){
     $(table).find('button.show-item').off('click').click( function(event){
         let url = $(event.currentTarget).data('url');
         let name = $(event.currentTarget).data('name');
-        if(!name | name === "undefined"){
+        if(!name || name === "undefined"){
             name = url;
         }
         $.get(url, function(r){
@@ -280,13 +311,9 @@ function initControlsDT(table){
 function handleAjaxError(jqXHR, textStatus, errorThrown){
     if(jqXHR.responseJSON){
         let message = jqXHR.responseJSON['@error']['@message'];
-        showErrorToast(textStatus, message);
+        toastr.error(message, textStatus);
     }
     else{
-        showErrorToast(textStatus,errorThrown);
+        toastr.error(errorThrown,textStatus);
     }
-}
-
-function showErrorToast(title, message){
-    toastr.error(message, title);
 }
