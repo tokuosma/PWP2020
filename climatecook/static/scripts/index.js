@@ -215,7 +215,8 @@ function showForm(url, method, schema, data, returnUrl, title){
             data: JSON.stringify(getFormData($(form))),
             success: () =>{
                 showResource(returnUrl, returnUrl);
-            }
+            },
+            error: handleAjaxError
         });
     });
 
@@ -274,4 +275,18 @@ function initControlsDT(table){
             showResource(url, name);
         });
     });
+}
+
+function handleAjaxError(jqXHR, textStatus, errorThrown){
+    if(jqXHR.responseJSON){
+        let message = jqXHR.responseJSON['@error']['@message'];
+        showErrorToast(textStatus, message);
+    }
+    else{
+        showErrorToast(textStatus,errorThrown);
+    }
+}
+
+function showErrorToast(title, message){
+    toastr.error(message, title);
 }

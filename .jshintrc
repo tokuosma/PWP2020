@@ -2,7 +2,8 @@
     "globals": {
         "$": false,
         "document":false,
-        "console":false
+        "console":false,
+        "toastr":false
     },
     "esversion":6
 }
