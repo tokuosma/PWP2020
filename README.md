@@ -66,10 +66,7 @@ The API contains the following resources:
 
 ## Client
 
-The demo client runs under the same application and can be accessed at http://\<host\>:\<port\>/client/ :
-
-![alt text][client_entry]
-[client_entry]: https://github.com/tokuosma/PWP2020/blob/master/docs/img/client_entry.png "Client Entry"
+The demo client runs under the same application and can be accessed at http://\<host\>:\<port\>/client/ .
 
 The client is a hypermedia client that exposes all the APIs available resources.
 
