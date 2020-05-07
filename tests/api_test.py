@@ -47,6 +47,7 @@ def _populate_db():
         db.session.add(f)
 
         e = FoodItemEquivalent(
+            id=i,
             food_item_id=i,
             unit_type="kilogram",
             conversion_factor=1
@@ -61,6 +62,20 @@ def _populate_db():
             quantity=1.0,
         )
         db.session.add(g)
+    h = FoodItem(
+        id=4,
+        name="lonely-food-item",
+        emission_per_kg=5.5
+    )
+    db.session.add(h)
+
+    j = FoodItemEquivalent(
+        id=4,
+        food_item_id=4,
+        unit_type="teaspoon",
+        conversion_factor=202.88
+    )
+    db.session.add(j)
 
     db.session.commit()
 
@@ -89,9 +104,9 @@ def _get_obj(obj_type):
     if(obj_type == "food_item_equivalent"):
         return {
             "id": i,
-            "food_item_id": 1,
-            "conversion_factor": .1,
-            "unit_type": "cup"
+            "food_item_id": 4,
+            "unit_type": "cup",
+            "conversion_factor": .1
         }
 
     if(obj_type == "ingredient"):
@@ -313,10 +328,11 @@ class TestRecipeItem(object):
         assert "id" in body
         assert "emissions_total" in body
         assert "items" in body
-        items = body['items']
-        for item in items:
-            _check_control_get_method("self", client, item)
-            _check_control_get_method_redirect("profile", client, item)
+        for item in body["items"]:
+            assert "recipe_id" in item
+            assert "food_item_id" in item
+            assert "food_item_equivalent_id" in item
+            assert "quantity" in item
 
     def test_get_not_found(self, client):
         """
@@ -498,8 +514,8 @@ class TestRecipeItem(object):
 
 class TestIngredientItem(object):
 
-    RESOURCE_URL = "/api/recipes/1/ingredients/1"
-    INVALID_RESOURCE_URL = "/api/recipes/1/ingredients/lalilulelo"
+    RESOURCE_URL = "/api/recipes/1/ingredients/1/"
+    INVALID_RESOURCE_URL = "/api/recipes/1/ingredients/lalilulelo/"
 
     def test_get(self, client):
         """
@@ -511,10 +527,10 @@ class TestIngredientItem(object):
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 200
         body = json.loads(resp.data)
-        body.json.loads(resp.data)
+        body = json.loads(resp.data)
         _check_namespace(client, body)
         _check_control_get_method("self", client, body)
-        _check_control_post_method("edit", client, body, "ingredient")
+        _check_control_put_method("edit", client, body, "ingredient")
         _check_control_delete_method("clicook:delete", client, body)
 
         assert "id" in body
@@ -550,6 +566,7 @@ class TestIngredientItem(object):
         resp = client.get(resp.headers["Location"])
         assert resp.status_code == 200
         body = json.loads(resp.data)
+        print(body)
         assert body["quantity"] == new_quantity
 
     def test_put_not_found(self, client):
@@ -590,7 +607,7 @@ class TestIngredientItem(object):
         """
         valid = _get_obj("ingredient")
         valid["id"] = 1
-        valid.pop("resource_id")
+        valid.pop("recipe_id")
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
@@ -605,7 +622,7 @@ class TestIngredientItem(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_recipe_id(self, client):
         """
@@ -616,7 +633,7 @@ class TestIngredientItem(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_food_item_id(self, client):
         """
@@ -627,7 +644,7 @@ class TestIngredientItem(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_food_item_equivalent_id(self, client):
         """
@@ -638,7 +655,7 @@ class TestIngredientItem(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_quantity(self, client):
         """
@@ -685,7 +702,7 @@ class TestFoodItemCollection(object):
         _check_namespace(client, body)
         _check_control_get_method("self", client, body)
         _check_control_post_method("clicook:add-food-item", client, body, "food_item")
-        assert len(body["items"]) == 3
+        assert len(body["items"]) == 4
         for item in body["items"]:
             assert "name" in item
             _check_control_get_method("self", client, item)
@@ -730,7 +747,7 @@ class TestFoodItemCollection(object):
         # test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 201
-        resource_url = self.RESOURCE_URL + "4" + "/"
+        resource_url = self.RESOURCE_URL + "5" + "/"
         assert resp.headers["Location"].endswith(resource_url)
         resp = client.get(resp.headers["Location"])
         assert resp.status_code == 200
@@ -796,7 +813,7 @@ class TestFoodItemCollection(object):
 
 class TestFoodItemResource(object):
 
-    RESOURCE_URL = "/api/food-items/1/"
+    RESOURCE_URL = "/api/food-items/4/"
     INVALID_RESOURCE_URL = "/api/food-items/lalilulelo/"
 
     def test_get(self, client):
@@ -837,7 +854,7 @@ class TestFoodItemResource(object):
         Tests the PUT method using a valid object.
         """
         valid = _get_obj("food_item")
-        valid["id"] = 1
+        valid["id"] = 4
         new_name = "new_name"
         valid["name"] = new_name
         # test with valid and see that it exists afterward
@@ -959,7 +976,9 @@ class TestFoodItemResource(object):
         """
         Tests the DELETE method using an valid id.
         """
-        resp = client.delete(self.RESOURCE_URL)
+        valid = _get_obj("food_item")
+        client.put(self.RESOURCE_URL)
+        resp = client.delete(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 204
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 404
@@ -993,26 +1012,6 @@ class TestFoodItemResource(object):
         valid = _get_obj("food_item_equivalent")
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
         assert resp.status_code == 415
-        body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile", client, body)
-
-    def test_post_invalid_unit_type(self, client):
-        """
-        Test add-food-item-equivalent with a invalid unit type
-        """
-        valid = _get_obj("food_item_equivalent")
-        valid['food_item_id'] = 1
-        valid['unit_type'] = "kilogram"  # Unit type already reserved
-        resp = client.post(self.RESOURCE_URL, json=valid)
-        assert resp.status_code == 409
-        body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile", client, body)
-
-        valid = _get_obj("food_item_equivalent")
-        valid['food_item_id'] = 1
-        valid['unit_type'] = "lalilulelo"  # Invalid value for unit type
-        resp = client.post(self.RESOURCE_URL, json=valid)
-        assert resp.status_code == 400
         body = json.loads(resp.data)
         _check_control_get_method_redirect("profile", client, body)
 
@@ -1067,8 +1066,8 @@ class TestFoodItemResource(object):
 
 class TestFoodItemEquivalentResource(object):
 
-    RESOURCE_URL = "/api/food-items/1/equivalents/1/"
-    INVALID_RESOURCE_URL = "/api/food-items/1/equivalents/lalilulelo"
+    RESOURCE_URL = "/api/food-items/4/equivalents/4/"
+    INVALID_RESOURCE_URL = "/api/food-items/4/equivalents/lalilulelo/"
 
     def test_get(self, client):
         """
@@ -1080,10 +1079,9 @@ class TestFoodItemEquivalentResource(object):
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 200
         body = json.loads(resp.data)
-        body.json.loads(resp.data)
         _check_namespace(client, body)
         _check_control_get_method("self", client, body)
-        _check_control_post_method("edit", client, body, "ingredient")
+        _check_control_put_method("edit", client, body, "food_item_equivalent")
         _check_control_delete_method("clicook:delete", client, body)
 
         assert "id" in body
@@ -1108,7 +1106,7 @@ class TestFoodItemEquivalentResource(object):
         Tests the PUT method using a valid object.
         """
         valid = _get_obj("food_item_equivalent")
-        valid["id"] = 1
+        valid["id"] = 4
         new_conversion_factor = 1000.0
         valid["conversion_factor"] = new_conversion_factor
         resp = client.put(self.RESOURCE_URL, json=valid)
@@ -1173,7 +1171,7 @@ class TestFoodItemEquivalentResource(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_food_item_id(self, client):
         """
@@ -1184,7 +1182,7 @@ class TestFoodItemEquivalentResource(object):
         resp = client.put(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         body = json.loads(resp.data)
-        _check_control_get_method_redirect("profile". client, body)
+        _check_control_get_method_redirect("profile", client, body)
 
     def test_put_invalid_unit_type(self, client):
         """
@@ -1210,7 +1208,7 @@ class TestFoodItemEquivalentResource(object):
 
     def test_delete(self, client):
         """
-        Tests the DELETE method using an valid id.
+        Tests the DELETE method using a valid id.
         """
         resp = client.delete(self.RESOURCE_URL)
         assert resp.status_code == 204

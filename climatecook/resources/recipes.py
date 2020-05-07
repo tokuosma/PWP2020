@@ -101,6 +101,7 @@ class RecipeItem(Resource):
         for ingredient in ingredients:
             item = IngredientBuilder()
             item["food_item_id"] = ingredient.food_item_id
+            item["recipe_id"] = ingredient.recipe_id
             item["food_item_equivalent_id"] = ingredient.food_item_equivalent_id
             item["quantity"] = ingredient.quantity
             body["emissions_total"] += ingredient.food_item.emission_per_kg \
@@ -234,8 +235,8 @@ class IngredientItem(Resource):
             "Ingredient with id {0} not found".format(ingredient_id))
 
         body.add_control("self", api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id))
-        body.add_control_edit_ingredient(recipe_id, ingredient_id)
-        body.add_control_delete_ingredient(recipe_id, ingredient_id)
+        body.add_control_edit_ingredient(ingredient.recipe_id, ingredient.id)
+        body.add_control_delete_ingredient(ingredient.recipe_id, ingredient.id)
         body.add_control("profile", "/api/profiles/")
 
         body["id"] = ingredient.id
@@ -246,7 +247,7 @@ class IngredientItem(Resource):
 
         return Response(json.dumps(body), 200, mimetype=MASON)
 
-    def put(self, recipe_id, ingredient_id):
+    def put(self, ingredient_id, recipe_id):
         if request.json is None:
             return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
 
@@ -265,20 +266,46 @@ class IngredientItem(Resource):
             if new_id != ingredient.id and Ingredient.query.filter_by(id=new_id).first() is not None:
                 return MasonBuilder.get_error_response(409, "Ingredient id is already taken",
                     "Ingredient id {0} is already taken".format(new_id))
-
             if new_id < 0:
                 return MasonBuilder.get_error_response(400, "Ingredient id must be a positive integer", "")
             ingredient.id = new_id
 
+        new_food_item_id = request.json['food_item_id']
+        if new_food_item_id is not None:
+            if new_food_item_id < 0:
+                return MasonBuilder.get_error_response(400, "FoodItem id must be a positive integer", "")
+            ingredient.food_item_id = new_food_item_id
+
+        new_food_item_equivalent_id = request.json['food_item_equivalent_id']
+        if new_food_item_equivalent_id is not None:
+            if new_food_item_equivalent_id < 0:
+                return MasonBuilder.get_error_response(400, "FoodItemEquivalent id must be a positive integer", "")
+            ingredient.food_item_equivalent_id = new_food_item_equivalent_id
+
+        new_recipe_id = request.json['recipe_id']
+        if new_recipe_id is not None:
+            if new_recipe_id < 0:
+                return MasonBuilder.get_error_response(400, "Recipe id must be a positive integer", "")
+            ingredient.recipe_id = new_recipe_id
+
+        quantity = 0
+        try:
+            quantity = float(request.json["quantity"])
+            if quantity < 0:
+                raise ValueError
+        except ValueError:
+            return MasonBuilder.get_error_response(400, "Quantity must be a positive number", "")
+        ingredient.quantity = quantity
+
         db.session.commit()
         headers = {
-            "Location": api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient.id)
+            "Location": api.url_for(IngredientItem, recipe_id=ingredient.recipe_id, ingredient_id=ingredient.id)
         }
         response = Response(None, 204, headers=headers)
         return response
 
-    def delete(self, ingredient_id):
-        ingredient = Ingredient.quert.filter_by(id=ingredient_id).first()
+    def delete(self, ingredient_id, recipe_id):
+        ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
         if ingredient is None:
             return MasonBuilder.get_error_response(404, "Ingredient not found",
             "Ingredient with id {0} not found".format(ingredient_id))
@@ -360,9 +387,7 @@ class IngredientBuilder(MasonBuilder):
             "clicook:delete",
             href=api.url_for(IngredientItem, recipe_id=recipe_id, ingredient_id=ingredient_id),
             method="DELETE",
-            encoding="json",
             title="Delete an ingredient",
-            schema=IngredientBuilder.ingredient_schema()
         )
 
     @staticmethod

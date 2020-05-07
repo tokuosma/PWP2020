@@ -266,7 +266,7 @@ class FoodItemResource(Resource):
             return MasonBuilder.get_error_response(404, "FoodItem not found.",
             "FoodItem with id {0} not found".format(food_item_id))
 
-        num_ingredient = Ingredient.query.filter_by(food_item_id=food_item.id).count()
+        num_ingredient = Ingredient.query.filter_by(food_item_id=food_item_id).count()
         if num_ingredient > 0:
             return MasonBuilder.get_error_response(409, "Cannot delete food item in use.",
             "FoodItem with is used for {0} ingredients".format(num_ingredient))
@@ -279,17 +279,17 @@ class FoodItemResource(Resource):
 class FoodItemEquivalentResource(Resource):
     def get(self, food_item_id, food_item_equivalent_id):
         body = FoodItemEquivalentBuilder()
-        body.add_namespace("clicook", "/api/link-relations")
+        body.add_namespace("clicook", "/api/link-relations/")
         food_item_equivalent = FoodItemEquivalent.query.filter_by(id=food_item_equivalent_id).first()
 
         if food_item_equivalent is None:
             return MasonBuilder.get_error_response(404, "Equivalent not found",
             "FoodItemEquivalent with id {0} not found".format(food_item_equivalent_id))
 
-        body.add_control("self", api.url_for(FoodItemEquivalentResource, food_item_id=food_item_id,
-        food_item_equivalent_id=food_item_equivalent_id))
-        body.add_control_edit_food_item_equivalent(food_item_id, food_item_equivalent_id)
-        body.add_control_delete_food_item_equivalent(food_item_id, food_item_equivalent_id)
+        body.add_control("self", api.url_for(FoodItemEquivalentResource, food_item_id=food_item_equivalent.food_item_id,
+        food_item_equivalent_id=food_item_equivalent.id))
+        body.add_control_edit_food_item_equivalent(food_item_equivalent.food_item_id, food_item_equivalent.id)
+        body.add_control_delete_food_item_equivalent(food_item_equivalent.food_item_id, food_item_equivalent.id)
         body.add_control("profile", "/api/profiles/")
 
         body["id"] = food_item_equivalent.id
@@ -299,7 +299,7 @@ class FoodItemEquivalentResource(Resource):
 
         return Response(json.dumps(body), 200, mimetype=MASON)
 
-    def put(self, food_item_equivalent_id):
+    def put(self, food_item_id, food_item_equivalent_id):
         if request.json is None:
             return MasonBuilder.get_error_response(415, "Request content type must be JSON", "")
 
@@ -311,7 +311,7 @@ class FoodItemEquivalentResource(Resource):
 
         keys = request.json.keys()
         if not set(["food_item_id", "unit_type", "conversion_factor"]).issubset(keys):
-            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields")
+            return MasonBuilder.get_error_response(400, "Incomplete request - missing fields", "")
 
         unit_type = request.json['unit_type']
         if unit_type not in [e.value for e in EquivalentUnitType]:
@@ -327,7 +327,15 @@ class FoodItemEquivalentResource(Resource):
         except ValueError:
             return MasonBuilder.get_error_response(400, "Conversion factor must be a positive number", "")
         food_item_equivalent.conversion_factor = conversion_factor
-
+        if "food_item_id" in keys:
+            try:
+                new_food_item_id = int(request.json["food_item_id"])
+                if new_food_item_id is not None:
+                    if new_food_item_id < 0:
+                        return MasonBuilder.get_error_response(400,
+                            "FoodItem id must be a positive integer", "")
+            except ValueError:
+                return MasonBuilder.get_error_response(400, "FoodItem id must be a positive integer", "")
         if "id" in keys:
             try:
                 new_id = int(request.json['id'])
@@ -346,12 +354,12 @@ class FoodItemEquivalentResource(Resource):
 
         db.session.commit()
         headers = {
-            "Location": api.url_for(FoodItemEquivalentResource, food_item_equivalent_id=food_item_equivalent.id)
+            "Location": api.url_for(FoodItemEquivalentResource, food_item_equivalent_id=food_item_equivalent.id, food_item_id=food_item_id)
         }
         response = Response(None, 204, headers=headers)
         return response
 
-    def delete(self, food_item_equivalent_id):
+    def delete(self, food_item_equivalent_id, food_item_id):
         food_item_equivalent = FoodItemEquivalent.query.filter_by(id=food_item_equivalent_id).first()
         if food_item_equivalent is None:
             return MasonBuilder.get_error_response(404, "FoodItemEquivalent not found.",
@@ -472,6 +480,5 @@ class FoodItemEquivalentBuilder(MasonBuilder):
             href=api.url_for(FoodItemEquivalentResource, food_item_id=food_item_id,
             food_item_equivalent_id=food_item_equivalent_id),
             method="DELETE",
-            encoding="json",
             title="Delete an existing equivalent",
         )
