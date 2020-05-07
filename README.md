@@ -50,7 +50,7 @@ venv
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
 
-The API should now be up and running and the resources should be accessible. The API entry point is http://<host>:<port>/api/ 
+The API should now be up and running and the resources should be accessible. The API entry point is http://\<host\>:\<port\>/api/ 
 
 The API contains the following resources:
 
@@ -63,3 +63,11 @@ The API contains the following resources:
 | FoodItemCollection | /api/food-items | A collection of all available food items. New food items can be added to the collection| GET, POST |
 | FoodItem | /api/food-items/{food_item_id} | Represents a single food item that can be viewed, edited or deleted. All the equivalents related to the food item are also returned as separate items and new equivalents can be added with POST | GET, POST, PUT, DELETE |
 | FoodItemEquivalent | api/food-items/{food_item_id}/equivalents/{food_item_equivalent_id} | Represents a single food item equivalent that can be viewed, edited or deleted.| GET, PUT, DELETE |
+
+## Client
+
+The demo client runs under the same application and can be accessed at http://\<host\>:\<port\>/client/ .
+
+The client is a hypermedia client that exposes all the APIs available resources.
+
+
